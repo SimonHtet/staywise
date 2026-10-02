@@ -403,3 +403,20 @@ model LoginAttempt {
   count   Int      @default(0)
   resetAt DateTime
 }
+
+// The hotel's own room categories (replaces the hardcoded demo ROOM_TYPES).
+// Room.type holds the code. When a hotel has none, the app falls back to
+// the demo constants so existing data keeps rendering.
+model RoomType {
+  id        String   @id @default(cuid())
+  hotelId   String
+  code      String // e.g. "DELUXE" — stored on Room.type / Reservation.roomTypeId
+  name      String // e.g. "Deluxe Twin"
+  rate      Float    @default(0) // default nightly rate for rooms of this type
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([hotelId, code])
+  @@index([hotelId])
+}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Company } from '@/types'
-import { ROOM_TYPES } from '@/lib/constants'
+import { useRoomTypes } from '@/lib/useRoomTypes'
 import { X, Building2, AlertTriangle } from 'lucide-react'
 
 const inputCls = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent'
@@ -25,14 +25,8 @@ interface Props {
   onClose: () => void
 }
 
-const RACK_RATES: Record<string, number> = {
-  STANDARD: 1200,
-  DELUXE: 1800,
-  SUITE: 3500,
-  POOL_VILLA: 6500,
-}
-
 export default function CompanyForm({ initial, onSave, onClose }: Props) {
+  const { types: roomTypes } = useRoomTypes()
   const [form, setForm] = useState({
     name: initial?.name ?? '',
     type: initial?.type ?? 'COMPANY',
@@ -42,12 +36,8 @@ export default function CompanyForm({ initial, onSave, onClose }: Props) {
     address: initial?.address ?? '',
     taxId: initial?.taxId ?? '',
     notes: initial?.notes ?? '',
-    contractRates: {
-      STANDARD: initial?.contractRates?.STANDARD ?? 0,
-      DELUXE: initial?.contractRates?.DELUXE ?? 0,
-      SUITE: initial?.contractRates?.SUITE ?? 0,
-      POOL_VILLA: initial?.contractRates?.POOL_VILLA ?? 0,
-    },
+    // Discount % per room-type code; types without an entry have no discount
+    contractRates: { ...((initial?.contractRates ?? {}) as Record<string, number>) },
     blackoutEnabled: !!(initial?.blackoutStart),
     blackoutStart: initial?.blackoutStart ?? '',
     blackoutEnd: initial?.blackoutEnd ?? '',
@@ -164,13 +154,12 @@ export default function CompanyForm({ initial, onSave, onClose }: Props) {
               <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Contract Rates (% Discount Off Rack)</p>
             </div>
             <div className="p-4 space-y-3">
-              {(['STANDARD', 'DELUXE', 'SUITE', 'POOL_VILLA'] as const).map((rt) => {
-                const rack = RACK_RATES[rt]
+              {roomTypes.map(({ code: rt, name: rtName, rate: rack }) => {
                 const disc = form.contractRates[rt] ?? 0
                 const contracted = disc > 0 ? Math.round(rack * (1 - disc / 100)) : rack
                 return (
                   <div key={rt} className="flex items-center gap-4">
-                    <div className="w-28 text-sm font-medium text-gray-700">{ROOM_TYPES[rt]?.name ?? rt}</div>
+                    <div className="w-28 text-sm font-medium text-gray-700">{rtName}</div>
                     <div className="flex items-center gap-2 flex-1">
                       <input
                         type="number"

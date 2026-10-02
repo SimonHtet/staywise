@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { prefetchFolios } from '@/lib/folio-prefetch'
 import { motion, AnimatePresence } from 'motion/react'
 import { Reservation, Room, Charge } from '@/types'
-import { ROOM_TYPES } from '@/lib/constants'
+import { useRoomTypes } from '@/lib/useRoomTypes'
 import { RecordDepositModal } from './Modals'
 import {
   getResStatusBadge,
@@ -108,6 +108,7 @@ export default function ReservationDetailPanel({
   onUpdateReservation,
   initialCheckInMode = false,
 }: Props) {
+  const { nameOf } = useRoomTypes()
   const [localRes, setLocalRes] = useState(() => normalizeRes(initialRes))
   const [editingField, setEditingField] = useState<string | null>(null)
   const [checkInMode, setCheckInMode] = useState(initialCheckInMode)
@@ -155,7 +156,7 @@ export default function ReservationDetailPanel({
   )
 
   const room = rooms.find((r) => r.id === localRes.roomId)
-  const roomTypeName = ROOM_TYPES[localRes.roomTypeId]?.name ?? localRes.roomTypeId
+  const roomTypeName = nameOf(localRes.roomTypeId)
   const nights = calculateNights(localRes.checkIn, localRes.checkOut)
 
   // Charges actually displayed on the folio = saved charges + pending (pre-checkin) packages.

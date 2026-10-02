@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Room, Reservation } from '@/types'
-import { ROOM_TYPES } from '@/lib/constants'
+import { useRoomTypes } from '@/lib/useRoomTypes'
 import { calculateNights } from '@/lib/utils'
 import { GripVertical } from 'lucide-react'
 import { dateIn } from '@/lib/dates'
@@ -65,6 +65,7 @@ const ROW_STATUS_BORDER: Record<string, string> = {
 }
 
 export default function RoomTimelineView({ rooms, reservations, onSelectReservation, onRefresh }: Props) {
+  const { nameOf } = useRoomTypes()
   const [dayOffset, setDayOffset] = useState(-DAY_BACK)
   const days = getDays(TOTAL_DAYS, dayOffset)
   const today = toDateStr(new Date())
@@ -276,7 +277,7 @@ export default function RoomTimelineView({ rooms, reservations, onSelectReservat
                   <div>
                     <span className="text-sm font-semibold text-gray-800">{room.id}</span>
                     <span className="ml-2 text-xs text-gray-400">
-                      {ROOM_TYPES[room.type]?.name?.split(' ')[0] ?? room.type}
+                      {nameOf(room.type).split(' ')[0]}
                     </span>
                   </div>
                   {(() => {

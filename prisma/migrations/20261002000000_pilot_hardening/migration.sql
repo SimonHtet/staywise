@@ -36,9 +36,29 @@ CREATE TABLE "LoginAttempt" (
     CONSTRAINT "LoginAttempt_pkey" PRIMARY KEY ("key")
 );
 
+-- CreateTable
+CREATE TABLE "RoomType" (
+    "id" TEXT NOT NULL,
+    "hotelId" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "rate" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "sortOrder" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "RoomType_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE INDEX "AuditLog_hotelId_createdAt_idx" ON "AuditLog"("hotelId", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "AuditLog_hotelId_entity_entityId_idx" ON "AuditLog"("hotelId", "entity", "entityId");
+
+-- CreateIndex
+CREATE INDEX "RoomType_hotelId_idx" ON "RoomType"("hotelId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RoomType_hotelId_code_key" ON "RoomType"("hotelId", "code");
 

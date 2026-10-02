@@ -9,10 +9,7 @@ import {
   ChevronDown, ChevronUp, CreditCard, Printer, PlusCircle,
 } from 'lucide-react'
 import { todayIn } from '@/lib/dates'
-
-const RACK_RATES: Record<string, number> = {
-  STANDARD: 1200, DELUXE: 1800, SUITE: 3500, POOL_VILLA: 6500,
-}
+import { useRoomTypes } from '@/lib/useRoomTypes'
 
 interface CreditSummary {
   creditLimit: number
@@ -22,6 +19,7 @@ interface CreditSummary {
 }
 
 export default function CompaniesView() {
+  const { types: roomTypes } = useRoomTypes()
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -235,14 +233,14 @@ export default function CompaniesView() {
                       </div>
                       {/* Contract rates */}
                       <div className="flex gap-2 mt-2 flex-wrap">
-                        {(['STANDARD', 'DELUXE', 'SUITE', 'POOL_VILLA'] as const).map((rt) => {
+                        {roomTypes.map(({ code: rt, name: rtName, rate: rack }) => {
                           const disc = rates[rt] ?? 0
                           if (!disc) return null
-                          const contracted = Math.round(RACK_RATES[rt] * (1 - disc / 100))
+                          const contracted = Math.round(rack * (1 - disc / 100))
                           return (
                             <span key={rt} className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700">
                               <BadgeDollarSign className="w-3 h-3" />
-                              {rt.replace('_', ' ')} {disc}% off · ฿{contracted.toLocaleString()}
+                              {rtName} {disc}% off · ฿{contracted.toLocaleString()}
                             </span>
                           )
                         })}

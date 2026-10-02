@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Room, Reservation, Company, ChargeCode } from '@/types'
-import { ROOM_TYPES, BOOKING_SOURCES, CHARGE_CATEGORIES, PAYMENT_TYPES, DEPARTMENTS } from '@/lib/constants'
+import { BOOKING_SOURCES, CHARGE_CATEGORIES, PAYMENT_TYPES, DEPARTMENTS } from '@/lib/constants'
 import { calculateNights } from '@/lib/utils'
 import { formatMoney, altToBase, rateFor, payableCurrencies, type HotelSetting } from '@/lib/currency'
 import {
@@ -11,6 +11,7 @@ import {
   Banknote,
 } from 'lucide-react'
 import { todayIn, addDays } from '@/lib/dates'
+import { useRoomTypes, rackRateFor } from '@/lib/useRoomTypes'
 
 // Fetches the hotel currency setting; null until loaded (modals fall back to base-only)
 function useHotelSetting(): HotelSetting | null {
@@ -121,16 +122,13 @@ interface NewReservationModalProps {
   initialRoomId?: string
 }
 
-const RACK_RATES: Record<string, number> = {
-  STANDARD: 1200, DELUXE: 1800, SUITE: 3500, POOL_VILLA: 6500,
-}
-
 export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }: NewReservationModalProps) {
   const today = todayIn()
   const tomorrow = addDays(todayIn(), 1)
 
+  const { types: roomTypes, nameOf, rateOf } = useRoomTypes()
   const initialRoom = initialRoomId ? rooms.find((r) => r.id === initialRoomId) : undefined
-  const initialRoomType = initialRoom?.type ?? 'STANDARD'
+  const initialRoomType = initialRoom?.type ?? roomTypes[0]?.code ?? 'STANDARD'
 
   const [form, setForm] = useState<NewReservationData>({
     guestName: '',
@@ -138,7 +136,7 @@ export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }
     roomTypeId: initialRoomType,
     checkIn: today,
     checkOut: tomorrow,
-    rate: ROOM_TYPES[initialRoomType]?.rate ?? ROOM_TYPES.STANDARD.rate,
+    rate: initialRoom ? rackRateFor(initialRoom, rateOf) : rateOf(initialRoomType),
     adults: 1,
     children: 0,
   })
@@ -158,7 +156,7 @@ export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }
     setForm((prev) => {
       const next = { ...prev, [field]: value }
       // Auto-update rate when room type changes
-      if (field === 'roomTypeId' && ROOM_TYPES[value]) {
+      if (field === 'roomTypeId' && roomTypes.some((t) => t.code === value)) {
         next.rate = applyContractRate(value, selectedCompany)
       }
       // Auto-update room type when room changes
@@ -166,15 +164,21 @@ export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }
         const room = rooms.find((r) => r.id === value)
         if (room) {
           next.roomTypeId = room.type
-          next.rate = applyContractRate(room.type, selectedCompany)
+          next.rate = applyContractRate(room.type, selectedCompany, room)
         }
       }
       return next
     })
   }
 
-  function applyContractRate(roomType: string, co: Company | null): number {
-    const rack = RACK_RATES[roomType] ?? ROOM_TYPES[roomType]?.rate ?? 0
+  // Rack = the chosen room's own rate (Settings → Room rates), else its type's rate
+  function rackRate(roomType: string, room?: Room): number {
+    const r = room ?? rooms.find((x) => x.id === form.roomId && x.type === roomType)
+    return r ? rackRateFor(r, rateOf) : rateOf(roomType)
+  }
+
+  function applyContractRate(roomType: string, co: Company | null, room?: Room): number {
+    const rack = rackRate(roomType, room)
     if (!co) return rack
     const rates = co.contractRates as Record<string, number>
     const disc = rates[roomType] ?? 0
@@ -200,7 +204,7 @@ export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }
       const roomType = form.roomTypeId
       setForm((prev) => ({ ...prev, companyId: companyId || undefined, rate: applyContractRate(roomType, co) }))
     } else {
-      setForm((prev) => ({ ...prev, companyId: undefined, rate: RACK_RATES[prev.roomTypeId] ?? prev.rate }))
+      setForm((prev) => ({ ...prev, companyId: undefined, rate: rackRate(prev.roomTypeId) || prev.rate }))
     }
   }
 
@@ -300,7 +304,7 @@ export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }
                 <option value="">Select room...</option>
                 {availableRooms.map((r) => (
                   <option key={r.id} value={r.id}>
-                    Room {r.id} — {ROOM_TYPES[r.type]?.name ?? r.type}
+                    Room {r.id} — {nameOf(r.type)}
                   </option>
                 ))}
               </select>
@@ -383,6 +387,7 @@ interface MoveRoomModalProps {
 }
 
 export function MoveRoomModal({ reservation: res, rooms, onConfirm, onClose }: MoveRoomModalProps) {
+  const { nameOf, rateOf } = useRoomTypes()
   const [selectedRoom, setSelectedRoom] = useState('')
   const [reason, setReason] = useState('')
   const [pricingAction, setPricingAction] = useState('no_change')
@@ -392,7 +397,7 @@ export function MoveRoomModal({ reservation: res, rooms, onConfirm, onClose }: M
   const availableRooms = rooms.filter((r) => r.status === 'available' && r.id !== res.roomId)
 
   const selectedRoomObj = rooms.find((r) => r.id === selectedRoom)
-  const newRate = selectedRoomObj ? (ROOM_TYPES[selectedRoomObj.type]?.rate ?? res.rate) : res.rate
+  const newRate = selectedRoomObj ? (rackRateFor(selectedRoomObj, rateOf) || res.rate) : res.rate
   const diff = newRate - res.rate
 
   useEffect(() => {
@@ -434,7 +439,7 @@ export function MoveRoomModal({ reservation: res, rooms, onConfirm, onClose }: M
             <option value="">Select available room...</option>
             {availableRooms.map((r) => (
               <option key={r.id} value={r.id}>
-                Room {r.id} — {ROOM_TYPES[r.type]?.name ?? r.type} (Floor {r.floor})
+                Room {r.id} — {nameOf(r.type)} (Floor {r.floor})
               </option>
             ))}
           </select>

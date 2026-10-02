@@ -41,7 +41,7 @@ async function POST_handler(
 
     const newRoom = await prisma.room.findFirst({
       where: { id: newRoomId, hotelId: hotelId! },
-      select: { id: true, type: true, status: true },
+      select: { id: true, type: true, status: true, rate: true },
     })
     if (!newRoom) {
       return NextResponse.json({ error: 'New room not found' }, { status: 404 })
@@ -110,7 +110,13 @@ async function POST_handler(
 
     // Apply pricing action when room type changes
     if (newRoom.type !== reservation.roomTypeId) {
-      const newRate = ROOM_TYPES[newRoom.type]?.rate ?? reservation.rate
+      // Same precedence as the booking form: room's own rate → hotel room type → demo constant
+      const typeRow = await prisma.roomType.findUnique({
+        where: { hotelId_code: { hotelId: hotelId!, code: newRoom.type } },
+        select: { rate: true },
+      })
+      const newRate =
+        (newRoom.rate > 0 ? newRoom.rate : 0) || typeRow?.rate || ROOM_TYPES[newRoom.type]?.rate || reservation.rate
       const today = await hotelToday(hotelId!)
 
       if (pricingAction === 'charge_diff') {

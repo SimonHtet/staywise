@@ -1,7 +1,7 @@
 'use client'
 
 import { Room, Reservation } from '@/types'
-import { ROOM_TYPES } from '@/lib/constants'
+import { useRoomTypes } from '@/lib/useRoomTypes'
 import { Wrench, Ban, BedDouble } from 'lucide-react'
 
 interface Props {
@@ -69,6 +69,7 @@ async function patchRoomStatus(roomId: string, status: string) {
 }
 
 export default function RoomGridView({ rooms, reservations, onSelectReservation, onRefresh, onNewReservation }: Props) {
+  const { nameOf } = useRoomTypes()
   const byFloor = groupByFloor(rooms)
   const floors = Object.keys(byFloor)
     .map(Number)
@@ -83,7 +84,7 @@ export default function RoomGridView({ rooms, reservations, onSelectReservation,
   }
 
   function getRoomTypeName(typeId: string) {
-    return ROOM_TYPES[typeId]?.name ?? typeId
+    return nameOf(typeId)
   }
 
   return (
