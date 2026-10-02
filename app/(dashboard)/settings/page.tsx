@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { ChargeCode, Room, StaffUser } from '@/types'
-import { Plus, Pencil, Check, X, ToggleLeft, ToggleRight, Trash2, KeyRound } from 'lucide-react'
+import Link from 'next/link'
+import { Plus, Pencil, Check, X, ToggleLeft, ToggleRight, Trash2, KeyRound, UserX, UserCheck, Wand2 } from 'lucide-react'
+import AuditLogSection from '@/components/AuditLogSection'
+import { toast } from '@/lib/toast'
 
 const inputCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent'
 
@@ -74,6 +77,19 @@ export default function SettingsPage() {
     const data = await res.json()
     if (!res.ok) { setUserError(data.error || 'Failed'); return }
     setEditingUserId(null)
+    loadUsers()
+  }
+
+  async function handleToggleActive(u: StaffUser) {
+    setUserError('')
+    const res = await fetch(`/api/users/${u.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: !u.active }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) { setUserError(data.error || 'Failed'); return }
+    toast(u.active ? `${u.name || u.email} can no longer sign in` : `${u.name || u.email} can sign in again`)
     loadUsers()
   }
 
@@ -280,11 +296,27 @@ export default function SettingsPage() {
   }, {})
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
+    <div className="p-4 sm:p-6 space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-500">Manage hotel configuration</p>
+        <h2 className="text-xl font-bold text-gray-900">Settings</h2>
+        <p className="text-sm text-gray-600">Manage hotel configuration</p>
       </div>
+
+      {isAdmin && (
+        <Link
+          href="/setup"
+          className="flex items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200 px-4 sm:px-6 py-4 hover:border-sky-300 transition-colors"
+        >
+          <span className="flex items-center gap-3">
+            <Wand2 className="w-5 h-5 text-sky-600" aria-hidden />
+            <span>
+              <span className="block font-semibold text-gray-900">Hotel details, room types and rooms</span>
+              <span className="block text-sm text-gray-600">Name and logo for receipts, time zone, main currency, adding rooms</span>
+            </span>
+          </span>
+          <span className="text-sm font-semibold text-sky-700 whitespace-nowrap">Open setup</span>
+        </Link>
+      )}
 
       {/* Staff Accounts Section — admin only */}
       {isAdmin && (
@@ -311,8 +343,9 @@ export default function SettingsPage() {
               {/* Add form */}
               {showAddUser && (
                 <div className="px-6 py-4 bg-teal-50 border-b border-teal-100">
-                  <p className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-3">New Staff Account</p>
-                  <div className="grid grid-cols-4 gap-3">
+                  <p className="text-sm font-semibold text-teal-800 mb-1">New staff login</p>
+                  <p className="text-xs text-teal-800/80 mb-3">They’ll be asked to choose their own password the first time they sign in.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <input
                       placeholder="Full name"
                       value={addUserForm.name}
@@ -327,7 +360,7 @@ export default function SettingsPage() {
                       className={inputCls}
                     />
                     <input
-                      placeholder="Password (min 6 chars)"
+                      placeholder="Temporary password (8+ chars)"
                       type="password"
                       value={addUserForm.password}
                       onChange={(e) => setAddUserForm(p => ({ ...p, password: e.target.value }))}
@@ -349,7 +382,8 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[40rem]">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50">
                     <th className="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Name</th>
@@ -405,7 +439,9 @@ export default function SettingsPage() {
                         <>
                           <td className="px-6 py-3 font-medium text-slate-800">
                             {u.name || <span className="text-slate-400 italic">No name</span>}
-                            {u.id === currentUserId && <span className="ml-2 text-[10px] font-bold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded">You</span>}
+                            {u.id === currentUserId && <span className="ml-2 text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">You</span>}
+                            {!u.active && <span className="ml-2 text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">Deactivated</span>}
+                            {u.active && u.mustChangePassword && <span className="ml-2 text-[10px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">Temporary password</span>}
                           </td>
                           <td className="px-3 py-3 text-slate-500">{u.email}</td>
                           <td className="px-3 py-3">
@@ -434,6 +470,16 @@ export default function SettingsPage() {
                                 </button>
                                 {u.id !== currentUserId && (
                                   <button
+                                    onClick={() => handleToggleActive(u)}
+                                    className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title={u.active ? 'Deactivate — blocks sign-in, keeps history' : 'Reactivate'}
+                                    aria-label={u.active ? `Deactivate ${u.name || u.email}` : `Reactivate ${u.name || u.email}`}
+                                  >
+                                    {u.active ? <UserX className="w-3.5 h-3.5 text-slate-500" /> : <UserCheck className="w-3.5 h-3.5 text-emerald-600" />}
+                                  </button>
+                                )}
+                                {u.id !== currentUserId && (
+                                  <button
                                     onClick={() => setDeleteConfirmId(u.id)}
                                     className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Delete"
@@ -450,11 +496,12 @@ export default function SettingsPage() {
                   ))}
                   {users.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-gray-400 text-sm">No staff accounts found.</td>
+                      <td colSpan={5} className="px-6 py-12 text-center text-gray-500 text-sm">No staff accounts found.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>
@@ -770,6 +817,8 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+      {/* Activity log — admin/manager */}
+      {canEditRates && <AuditLogSection />}
     </div>
   )
 }
