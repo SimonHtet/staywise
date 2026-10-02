@@ -522,6 +522,7 @@ export default function SettingsPage() {
               <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
@@ -587,6 +588,7 @@ export default function SettingsPage() {
                 )}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}
@@ -651,7 +653,7 @@ export default function SettingsPage() {
               {currencyError && <p className="text-xs text-red-600 mt-2">{currencyError}</p>}
 
               {/* Cross-rate reference table */}
-              <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {CROSS_PAIRS.map(([from, to]) => {
                   const fwd = crossRate(from, to)
                   const rev = crossRate(to, from)
@@ -706,7 +708,7 @@ export default function SettingsPage() {
             {showAdd && (
               <div className="px-6 py-4 bg-teal-50 border-b border-teal-100">
                 <p className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-3">New Charge Code</p>
-                <div className="grid grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                   <input placeholder="Code (e.g. 102)" value={addForm.code} onChange={(e) => setAddForm(p => ({ ...p, code: e.target.value }))} className={inputCls} />
                   <select value={addForm.category} onChange={(e) => setAddForm(p => ({ ...p, category: e.target.value }))} className={`${inputCls} bg-white`}>
                     <option value="">Category...</option>
@@ -728,6 +730,7 @@ export default function SettingsPage() {
             )}
 
             {/* Table */}
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
@@ -816,6 +819,7 @@ export default function SettingsPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

@@ -190,7 +190,7 @@ export default function RoomTimelineView({ rooms, reservations, onSelectReservat
   const dateRangeLabel = `${firstDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${lastDay.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Navigation bar */}
       <div className="flex items-center gap-3 mb-4">
         <button

@@ -422,11 +422,14 @@ export default function ReservationDetailPanel({
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="bg-white w-full max-w-5xl h-[90vh] max-h-[900px] shadow-2xl rounded-xl overflow-hidden flex flex-col border border-slate-200"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Reservation details"
+        className="bg-white w-full max-w-5xl h-[100dvh] sm:h-[90vh] sm:max-h-[900px] shadow-2xl sm:rounded-xl overflow-hidden flex flex-col border border-slate-200"
       >
         {/* HEADER */}
         <div
@@ -541,9 +544,9 @@ export default function ReservationDetailPanel({
         </div>
 
         {/* BODY: 40/60 SPLIT */}
-        <div className="flex-1 flex overflow-hidden min-h-0">
-          {/* LEFT: GUEST INFO */}
-          <div className="w-[40%] border-r border-slate-200 p-6 bg-white overflow-y-auto overscroll-contain">
+        <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden min-h-0">
+          {/* LEFT: GUEST INFO — stacks above the tabs on phones */}
+          <div className="w-full md:w-[40%] border-b md:border-b-0 md:border-r border-slate-200 p-4 sm:p-6 bg-white md:overflow-y-auto overscroll-contain">
             <div className="mb-6 flex justify-between items-start">
               <div>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
@@ -694,7 +697,7 @@ export default function ReservationDetailPanel({
           </div>
 
           {/* RIGHT: STAY / CHECK-IN ZONE */}
-          <div className="w-[60%] overflow-y-auto overscroll-contain bg-slate-50/30">
+          <div className="w-full md:w-[60%] md:overflow-y-auto overscroll-contain bg-slate-50/30">
             <div className="p-6 pb-0">
               <AnimatePresence mode="wait">
                 {checkInMode ? (
@@ -811,7 +814,7 @@ export default function ReservationDetailPanel({
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 10 }}
-                    className="grid grid-cols-3 gap-x-4 gap-y-3"
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3"
                   >
                     <EditableField
                       label="Arrival Date"
@@ -1074,6 +1077,7 @@ export default function ReservationDetailPanel({
                         </button>
                       </div>
                     </div>
+                    <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-slate-200">
@@ -1123,6 +1127,7 @@ export default function ReservationDetailPanel({
                         ))}
                       </tbody>
                     </table>
+                    </div>
                     <div className="pt-4 flex justify-end">
                       <div className="grid grid-cols-2 gap-x-8 gap-y-2 bg-slate-50 px-6 py-4 rounded-xl border border-slate-100">
                         <div className="text-right">
@@ -1216,7 +1221,7 @@ export default function ReservationDetailPanel({
                 {/* PREFERENCES TAB */}
                 {activeTab === 'preferences' && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {([
                         { key: 'smoking',     label: 'Smoking', placeholder: 'Non-smoking' },
                         { key: 'bed',         label: 'Bed Type', placeholder: 'King / Twin' },

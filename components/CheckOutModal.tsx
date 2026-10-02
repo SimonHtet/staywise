@@ -327,8 +327,8 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
   return (
     <>
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-        <div className="w-full max-w-5xl bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm">
+        <div role="dialog" aria-modal="true" aria-label="Check out" className="w-full max-w-5xl bg-white sm:rounded-lg shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[100dvh] sm:h-auto sm:max-h-[92vh]">
 
           {/* Header */}
           <div className="px-6 py-4 border-b border-slate-200 flex items-start justify-between shrink-0">
@@ -427,11 +427,12 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
               </div>
 
               {/* Body */}
-              <div className="flex flex-1 min-h-0 overflow-hidden divide-x divide-slate-200">
+              <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden md:divide-x divide-slate-200">
                 {/* LEFT — Charges */}
-                <div className="flex-[3] overflow-y-auto p-6">
+                <div className="md:flex-[3] md:overflow-y-auto p-4 sm:p-6">
                   {activeFolio && (
                     <>
+                      <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="border-b-2 border-slate-200">
@@ -503,6 +504,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                           )}
                         </tbody>
                       </table>
+                      </div>
 
                       {unassignedCharges.length > 0 && (
                         <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
@@ -535,7 +537,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                 </div>
 
                 {/* RIGHT — Settlement panel */}
-                <div className="flex-[2] flex flex-col overflow-y-auto p-6 bg-slate-50">
+                <div className="md:flex-[2] flex flex-col md:overflow-y-auto p-4 sm:p-6 bg-slate-50 border-t md:border-t-0 border-slate-200">
                   {activeFolio && (
                     <>
                       {/* Section 1 — Balance hero */}
@@ -845,7 +847,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
           )}
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-slate-200 flex items-center gap-3 bg-white shrink-0">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-200 flex flex-wrap items-center gap-2 sm:gap-3 bg-white shrink-0">
             <button
               onClick={() => window.open(`/print/${res.id}`, '_blank')}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-black rounded-lg hover:bg-slate-50 transition-all"

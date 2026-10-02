@@ -105,7 +105,7 @@ function RevenueTab() {
       {data && (
         <>
           {/* Summary cards */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: 'Total Collected', value: fmt(data.summary.totalCollected), sub: `${data.summary.totalFolios} folios settled`, color: 'text-emerald-600' },
               { label: 'City Ledger Posted', value: fmt(data.summary.cityLedgerPosted), sub: 'deferred revenue', color: 'text-sky-600' },
@@ -126,6 +126,7 @@ function RevenueTab() {
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                 <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">By Payment Method</p>
               </div>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
@@ -149,6 +150,7 @@ function RevenueTab() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* By Category */}
@@ -156,6 +158,7 @@ function RevenueTab() {
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                 <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">By Charge Category</p>
               </div>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
@@ -177,6 +180,7 @@ function RevenueTab() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
@@ -186,6 +190,7 @@ function RevenueTab() {
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                 <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">City Ledger Posted — By Company</p>
               </div>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
@@ -204,6 +209,7 @@ function RevenueTab() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
@@ -214,6 +220,7 @@ function RevenueTab() {
                 <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Daily Collected</p>
               </div>
               <div className="max-h-64 overflow-y-auto">
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-white">
                     <tr className="border-b border-gray-100">
@@ -232,6 +239,7 @@ function RevenueTab() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
@@ -295,7 +303,7 @@ function ARAgingTab() {
       </div>
 
       {/* Totals summary */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           { label: '0–30 days', value: data.totals.current, color: 'text-emerald-600' },
           { label: '31–60 days', value: data.totals.days31_60, color: 'text-amber-600' },
@@ -317,6 +325,7 @@ function ARAgingTab() {
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
@@ -366,6 +375,7 @@ function ARAgingTab() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
@@ -729,6 +739,7 @@ function TaxInvoicesTab() {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
@@ -810,6 +821,7 @@ function TaxInvoicesTab() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {showForm && (
@@ -837,7 +849,7 @@ export default function AccountingView() {
   const [tab, setTab] = useState<TabId>('revenue')
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 sm:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">Accounting</h1>
       </div>

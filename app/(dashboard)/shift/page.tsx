@@ -103,7 +103,7 @@ export default function ShiftPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
+    <div className="p-4 sm:p-6 space-y-6 max-w-4xl">
       <div>
         <h1 className="text-xl font-bold text-gray-900">Shift / Cash Drawer</h1>
         <p className="text-sm text-gray-500">Open a shift when taking over the drawer; blind-count and drop at handover</p>
@@ -212,7 +212,7 @@ export default function ShiftPage() {
                 : `Variance: ${(closeResult.variance ?? 0) > 0 ? '+' : ''}${fmtB(closeResult.variance ?? 0)} (${(closeResult.variance ?? 0) > 0 ? 'over' : 'short'})`}
             </h2>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
             <div className="bg-white/70 rounded-xl p-3">
               <p className="text-[10px] text-slate-400 uppercase tracking-widest">Expected Cash</p>
               <p className="font-black text-slate-900">{fmtB(closeResult.expectedCash ?? 0)}</p>
@@ -240,6 +240,7 @@ export default function ShiftPage() {
           <h2 className="font-semibold text-gray-900">Shift History</h2>
           <p className="text-xs text-gray-500 mt-0.5">Last 20 closed shifts</p>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50">
@@ -270,6 +271,7 @@ export default function ShiftPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

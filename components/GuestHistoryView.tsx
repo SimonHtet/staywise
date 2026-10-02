@@ -215,7 +215,7 @@ function GuestProfileSection({
         <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2">
           Preferences <span className="font-normal normal-case text-slate-300">(click to edit)</span>
         </p>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {PREF_FIELDS.map(({ key, label }) => (
             <EditablePrefField
               key={key}
@@ -290,7 +290,7 @@ export default function GuestHistoryView({ reservations, onSelectReservation }: 
   })
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Search */}
       <div className="mb-6 relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

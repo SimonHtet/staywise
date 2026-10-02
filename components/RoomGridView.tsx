@@ -88,7 +88,7 @@ export default function RoomGridView({ rooms, reservations, onSelectReservation,
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-4 sm:p-6 space-y-8">
       {/* Legend */}
       <div className="flex flex-wrap gap-3">
         {Object.entries(STATUS_STYLES).map(([status, s]) => (

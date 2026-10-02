@@ -336,6 +336,7 @@ function DailyTable({ data }: { data: DailyRevenue[] }) {
 
   return (
     <div className="overflow-y-auto max-h-[260px]">
+      <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead className="sticky top-0 bg-white">
           <tr className="border-b border-gray-100">
@@ -367,6 +368,7 @@ function DailyTable({ data }: { data: DailyRevenue[] }) {
           </tr>
         </tfoot>
       </table>
+      </div>
     </div>
   )
 }
@@ -392,6 +394,7 @@ function AccountTable({ rows, title }: { rows: CompanyRevenue[]; title: string }
       {filtered.length === 0 ? (
         <p className="text-sm text-gray-400 py-4 text-center">No data</p>
       ) : (
+        <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-gray-100">
@@ -414,6 +417,7 @@ function AccountTable({ rows, title }: { rows: CompanyRevenue[]; title: string }
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   )
@@ -468,7 +472,7 @@ export default function AnalyticsView() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header + controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
