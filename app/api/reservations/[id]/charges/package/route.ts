@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
-export async function DELETE(
+async function DELETE_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -54,3 +55,5 @@ export async function DELETE(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const DELETE = audited('reservation.packageRemove', DELETE_handler)

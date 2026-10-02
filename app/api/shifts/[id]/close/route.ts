@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { audited } from '@/lib/audit'
 
 // Blind cash drop: the clerk counts the drawer first, then the server reveals
 // the expected figure and logs the variance.
 
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -103,3 +104,5 @@ export async function POST(
     },
   })
 }
+
+export const POST = audited('shift.close', POST_handler)

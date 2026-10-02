@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
 import { checkLoginRateLimit, resetLoginAttempts } from './ratelimit'
+import { writeAudit } from './audit'
 
 // How often a live session re-reads the user row (role / active / hotel)
 const REVALIDATE_MS = 5 * 60 * 1000
@@ -28,13 +29,13 @@ export const authOptions: NextAuthOptions = {
           (req?.headers?.['x-real-ip'] as string | undefined) ||
           'unknown'
 
-        const email = credentials.email.trim()
+        const email = credentials.email.trim().toLowerCase()
         if (!(await checkLoginRateLimit(ip, email))) return null
 
         let user
         try {
-          user = await prisma.user.findUnique({
-            where: { email },
+          user = await prisma.user.findFirst({
+            where: { email: { equals: email, mode: 'insensitive' } },
           })
         } catch (err) {
           console.error('[auth] DB error during login:', err)
@@ -45,6 +46,15 @@ export const authOptions: NextAuthOptions = {
         if (!user || !valid || !user.active) return null
 
         await resetLoginAttempts(email)
+        await writeAudit({
+          hotelId: user.hotelId,
+          userId: user.id,
+          userName: user.name ?? user.email,
+          action: 'user.login',
+          entity: 'user',
+          entityId: user.id,
+          details: { ip },
+        })
 
         return {
           id: user.id,

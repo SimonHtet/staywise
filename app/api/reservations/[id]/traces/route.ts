@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -43,7 +44,7 @@ export async function POST(
   }
 }
 
-export async function PUT(
+async function PUT_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -82,3 +83,7 @@ export async function PUT(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.traceAdd', POST_handler)
+
+export const PUT = audited('reservation.traceUpdate', PUT_handler)

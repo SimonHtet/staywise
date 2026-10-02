@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
 // POST — assign a charge to a folio (moves it from any previous folio)
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string; folioId: string } }
 ) {
@@ -48,7 +49,7 @@ export async function POST(
 }
 
 // DELETE — remove charge from folio (unassign)
-export async function DELETE(
+async function DELETE_handler(
   req: NextRequest,
   { params }: { params: { id: string; folioId: string } }
 ) {
@@ -79,3 +80,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.folioAssign', POST_handler)
+
+export const DELETE = audited('reservation.folioUnassign', DELETE_handler)

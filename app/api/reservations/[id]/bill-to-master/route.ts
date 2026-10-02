@@ -4,12 +4,13 @@ import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { calculateNights } from '@/lib/utils'
 import { hotelToday } from '@/lib/hoteltime'
+import { audited } from '@/lib/audit'
 
 // POST — transfer this linked reservation's outstanding balance to its master
 // reservation's bill. Each open folio gets an offsetting "Billed to master"
 // line (netting it to zero) and the master's Main folio receives one matching
 // charge, so group totals settle on the master room and nothing is counted twice.
-export async function POST(
+async function POST_handler(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -152,3 +153,5 @@ export async function POST(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.billToMaster', POST_handler)

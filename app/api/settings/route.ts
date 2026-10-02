@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { audited } from '@/lib/audit'
 
 const CURRENCIES = ['THB', 'MMK', 'USD', 'EUR', 'SGD', 'CNY']
 
@@ -17,7 +18,7 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json(setting)
 }
 
-export async function PUT(req: NextRequest) {
+async function PUT_handler(req: NextRequest) {
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -86,3 +87,5 @@ export async function PUT(req: NextRequest) {
   })
   return NextResponse.json(setting)
 }
+
+export const PUT = audited('settings.update', PUT_handler)

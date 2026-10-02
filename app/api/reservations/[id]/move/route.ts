@@ -5,8 +5,9 @@ import { hasPermission } from '@/lib/rbac'
 import { calculateNights } from '@/lib/utils'
 import { ROOM_TYPES } from '@/lib/constants'
 import { hotelToday } from '@/lib/hoteltime'
+import { audited } from '@/lib/audit'
 
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -154,3 +155,5 @@ export async function POST(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.move', POST_handler)

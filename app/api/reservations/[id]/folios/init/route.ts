@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
 // POST — ensure a "Main" folio exists and all unassigned charges are on it.
 // Caller (CheckOutModal) discards the response and re-fetches /folios, so we
 // return only { ok, folioId } and skip the heavy nested re-read.
-export async function POST(
+async function POST_handler(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -66,3 +67,5 @@ export async function POST(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.folioInit', POST_handler)

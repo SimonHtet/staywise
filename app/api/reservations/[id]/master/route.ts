@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
 // POST /api/reservations/[id]/master — link this reservation under a master
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -48,7 +49,7 @@ export async function POST(
 }
 
 // DELETE /api/reservations/[id]/master — unlink this reservation from its master
-export async function DELETE(
+async function DELETE_handler(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -76,3 +77,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.linkMaster', POST_handler)
+
+export const DELETE = audited('reservation.unlinkMaster', DELETE_handler)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { audited } from '@/lib/audit'
 
 export async function GET() {
   const { hotelId, error } = await getSessionOrUnauthorized()
@@ -19,7 +20,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'MANAGE_COMPANIES')) {
@@ -83,3 +84,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('company.create', POST_handler)

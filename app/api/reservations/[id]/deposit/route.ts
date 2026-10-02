@@ -3,11 +3,12 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { altToBase, rateFor } from '@/lib/currency'
+import { audited } from '@/lib/audit'
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
 const DEPOSIT_METHODS = ['Cash', 'Bank Transfer', 'Credit Card', 'PromptPay', 'Mobile Pay']
 
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -87,3 +88,5 @@ export async function POST(
 
   return NextResponse.json(deposit, { status: 201 })
 }
+
+export const POST = audited('reservation.deposit', POST_handler)

@@ -6,6 +6,7 @@ import { hasPermission } from '@/lib/rbac'
 import { generateReservationNumber, calculateNights, maskPassport } from '@/lib/utils'
 import { hotelToday } from '@/lib/hoteltime'
 import { addDays } from '@/lib/dates'
+import { audited } from '@/lib/audit'
 
 const ACTIVE_STATUSES = ['confirmed', 'checked_in']
 const DEFAULT_LIST_DAYS_BACK = 30
@@ -117,7 +118,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -293,3 +294,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.create', POST_handler)

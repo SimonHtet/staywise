@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { hotelToday } from '@/lib/hoteltime'
+import { audited } from '@/lib/audit'
 
 export async function GET(
   _req: NextRequest,
@@ -47,7 +48,7 @@ export async function GET(
   }
 }
 
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -136,7 +137,7 @@ export async function POST(
 }
 
 // PATCH — settle all unpaid transactions for this company
-export async function PATCH(
+async function PATCH_handler(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -176,3 +177,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('company.creditCharge', POST_handler)
+
+export const PATCH = audited('company.creditOverride', PATCH_handler)

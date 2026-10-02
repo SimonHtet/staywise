@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { audited } from '@/lib/audit'
 
 // One cash drawer per hotel — a single open shift at a time.
 
@@ -27,7 +28,7 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json({ current, history })
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
   const { hotelId, role, session, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -57,3 +58,5 @@ export async function POST(req: NextRequest) {
   })
   return NextResponse.json(shift, { status: 201 })
 }
+
+export const POST = audited('shift.open', POST_handler)

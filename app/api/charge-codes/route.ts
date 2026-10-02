@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
 export async function GET(req: NextRequest) {
   const { hotelId, error } = await getSessionOrUnauthorized()
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -61,3 +62,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('chargeCode.create', POST_handler)

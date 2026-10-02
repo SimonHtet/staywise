@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { hotelAuditDate } from '@/lib/hoteltime'
+import { audited } from '@/lib/audit'
 
 
 export async function GET(_req: NextRequest) {
@@ -15,7 +16,7 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json({ ran: !!audit, audit: audit ?? null })
 }
 
-export async function POST(_req: NextRequest) {
+async function POST_handler(_req: NextRequest) {
   const { hotelId, role, session, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -108,3 +109,5 @@ export async function POST(_req: NextRequest) {
     reservations: reservations.map((r) => ({ id: r.id, guestName: r.guestName, roomId: r.roomId, amount: r.rate })),
   })
 }
+
+export const POST = audited('nightAudit.run', POST_handler)

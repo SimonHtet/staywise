@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
 const PREF_FIELDS = ['smokingPref', 'bedPref', 'pillowPref', 'floorPref', 'viewPref', 'temperaturePref', 'allergiesPref']
 
-export async function PATCH(
+async function PATCH_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -39,3 +40,5 @@ export async function PATCH(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const PATCH = audited('guest.update', PATCH_handler)

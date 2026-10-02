@@ -1,4 +1,16 @@
 export type UserRole = 'admin' | 'manager' | 'front_desk' | 'housekeeping'
+export const USER_ROLES: readonly UserRole[] = ['admin', 'manager', 'front_desk', 'housekeeping']
+export const MIN_PASSWORD_LENGTH = 8
+
+export function isValidRole(role: unknown): role is UserRole {
+  return typeof role === 'string' && (USER_ROLES as readonly string[]).includes(role)
+}
+
+// Fields safe to return for a staff account
+export const USER_SELECT = {
+  id: true, name: true, email: true, role: true, hotelId: true,
+  active: true, mustChangePassword: true, createdAt: true,
+} as const
 
 export const PERMISSIONS = {
   CREATE_RESERVATION: ['admin', 'manager', 'front_desk'],

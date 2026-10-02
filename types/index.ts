@@ -266,6 +266,8 @@ export interface StaffUser {
   email: string
   role: string
   hotelId: string
+  active: boolean
+  mustChangePassword: boolean
   createdAt: string | Date
 }
 

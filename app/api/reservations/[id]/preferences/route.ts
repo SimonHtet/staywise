@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { audited } from '@/lib/audit'
 
-export async function PUT(
+async function PUT_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -49,3 +50,5 @@ export async function PUT(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const PUT = audited('reservation.preferences', PUT_handler)

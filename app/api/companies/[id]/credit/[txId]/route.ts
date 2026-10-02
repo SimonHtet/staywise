@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { audited } from '@/lib/audit'
 
-export async function PUT(
+async function PUT_handler(
   _req: NextRequest,
   { params }: { params: { id: string; txId: string } }
 ) {
@@ -40,3 +41,5 @@ export async function PUT(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const PUT = audited('company.creditSettle', PUT_handler)

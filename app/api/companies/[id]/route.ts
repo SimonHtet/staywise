@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { audited } from '@/lib/audit'
 
 export async function GET(
   _req: NextRequest,
@@ -23,7 +24,7 @@ export async function GET(
   }
 }
 
-export async function PUT(
+async function PUT_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -68,7 +69,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function DELETE_handler(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -97,3 +98,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const PUT = audited('company.update', PUT_handler)
+
+export const DELETE = audited('company.delete', DELETE_handler)

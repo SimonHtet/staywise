@@ -3,12 +3,13 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { calculateNights } from '@/lib/utils'
+import { audited } from '@/lib/audit'
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
 // Early departure: pull the check-out date forward so billing reflects the
 // nights actually stayed instead of the original booking.
-export async function POST(
+async function POST_handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -60,3 +61,5 @@ export async function POST(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('reservation.shorten', POST_handler)

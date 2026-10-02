@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { audited } from '@/lib/audit'
 
 async function nextInvoiceNumber(hotelId: string): Promise<string> {
   const now = new Date()
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+async function POST_handler(req: NextRequest) {
   const { hotelId, role, session, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'VIEW_FINANCIALS')) {
@@ -105,3 +106,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const POST = audited('taxInvoice.create', POST_handler)

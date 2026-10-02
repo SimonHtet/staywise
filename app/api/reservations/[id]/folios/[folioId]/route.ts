@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { calculateNights } from '@/lib/utils'
+import { audited } from '@/lib/audit'
 
-export async function PUT(
+async function PUT_handler(
   req: NextRequest,
   { params }: { params: { id: string; folioId: string } }
 ) {
@@ -100,3 +101,5 @@ export async function PUT(
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 }
+
+export const PUT = audited('reservation.folioUpdate', PUT_handler)
