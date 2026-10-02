@@ -4,6 +4,8 @@ import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { hotelToday } from '@/lib/hoteltime'
 import { audited } from '@/lib/audit'
+import { hotelAmountCap } from '@/lib/limits'
+import { formatMoney } from '@/lib/currency'
 
 export async function GET(
   _req: NextRequest,
@@ -93,7 +95,7 @@ async function POST_handler(
       const managerOverride = override === true && (role === 'admin' || role === 'manager')
       if (creditAvailable < delta && !managerOverride) {
         return NextResponse.json(
-          { error: `Insufficient credit — ฿${creditAvailable.toLocaleString()} available` },
+          { error: `Insufficient credit — ${formatMoney(creditAvailable, (await hotelAmountCap(hotelId!)).currency)} available` },
           { status: 400 }
         )
       }

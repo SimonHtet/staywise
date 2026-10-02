@@ -55,7 +55,7 @@ async function PUT_handler(
           const tendered = parseFloat(amountTendered)
           if (isNaN(tendered) || tendered < balance) {
             return NextResponse.json(
-              { error: `Cash tendered must cover the balance of ฿${balance.toLocaleString()}` },
+              { error: `Cash tendered must cover the balance of ${balance.toLocaleString()}` },
               { status: 400 }
             )
           }
@@ -75,7 +75,7 @@ async function PUT_handler(
           }
           if (Math.abs(posted - balance) > 0.01) {
             return NextResponse.json(
-              { error: `Posted company amount (฿${posted.toLocaleString()}) doesn't match the folio balance (฿${balance.toLocaleString()}) — re-post the balance before settling` },
+              { error: `Posted company amount (${posted.toLocaleString()}) doesn't match the folio balance (${balance.toLocaleString()}) — re-post the balance before settling` },
               { status: 400 }
             )
           }

@@ -8,10 +8,11 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { todayIn, addDays } from '@/lib/dates'
+import { cur } from '@/lib/money'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-const fmt = (n: number) => '฿' + Math.round(n).toLocaleString()
+const fmt = (n: number) => cur() + Math.round(n).toLocaleString()
 const pct = (part: number, total: number) => total === 0 ? '0%' : (part / total * 100).toFixed(1) + '%'
 
 const PM_LABELS: Record<string, string> = {

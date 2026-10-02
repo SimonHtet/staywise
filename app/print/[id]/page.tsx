@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { currencySymbol } from '@/lib/currency'
 import { formatMoney, baseToAlt } from '@/lib/currency'
 import PrintControls from './PrintControls'
 import { folioTotal, roomProjection, stayNights as nights } from '@/lib/folio'
@@ -41,6 +42,7 @@ export default async function FolioPrintPage({ params }: { params: { id: string 
   ])
 
   if (!reservation || reservation.hotelId !== hotelId) redirect('/reservations')
+  const sym = currencySymbol(setting?.baseCurrency ?? 'THB').trim()
 
   const n = nights(reservation.checkIn, reservation.checkOut)
   const grandTotal = reservation.folios.reduce((sum, f) => sum + folioTotal(f) + roomProjection(f, reservation), 0)
@@ -86,7 +88,7 @@ export default async function FolioPrintPage({ params }: { params: { id: string 
           <div><span className="text-slate-400 text-xs uppercase tracking-wide">Check-in</span><p className="font-bold text-slate-800">{fmt(reservation.checkIn)}</p></div>
           <div><span className="text-slate-400 text-xs uppercase tracking-wide">Check-out</span><p className="font-bold text-slate-800">{fmt(reservation.checkOut)}</p></div>
           <div><span className="text-slate-400 text-xs uppercase tracking-wide">Nights</span><p className="font-bold text-slate-800">{n}</p></div>
-          <div><span className="text-slate-400 text-xs uppercase tracking-wide">Rate / Night</span><p className="font-bold text-slate-800">฿{fmtCurrency(reservation.rate)}</p></div>
+          <div><span className="text-slate-400 text-xs uppercase tracking-wide">Rate / Night</span><p className="font-bold text-slate-800">{sym}{fmtCurrency(reservation.rate)}</p></div>
         </div>
 
         {/* Folios */}
@@ -112,10 +114,10 @@ export default async function FolioPrintPage({ params }: { params: { id: string 
                     <tr className="border-b border-slate-100">
                       <td className="py-1.5 px-2 text-slate-400 text-xs">{reservation.checkIn}</td>
                       <td className="py-1.5 px-2 text-slate-700">
-                        Room Charge — {reservation.roomTypeId} ({nights(reservation.checkIn, reservation.checkOut)} night{nights(reservation.checkIn, reservation.checkOut) !== 1 ? 's' : ''} × ฿{fmtCurrency(reservation.rate)})
+                        Room Charge — {reservation.roomTypeId} ({nights(reservation.checkIn, reservation.checkOut)} night{nights(reservation.checkIn, reservation.checkOut) !== 1 ? 's' : ''} × {sym}{fmtCurrency(reservation.rate)})
                       </td>
                       <td className="py-1.5 px-2 text-right font-medium text-slate-800">
-                        ฿{fmtCurrency(roomProjection(folio, reservation))}
+                        {sym}{fmtCurrency(roomProjection(folio, reservation))}
                       </td>
                     </tr>
                   )}
@@ -125,8 +127,8 @@ export default async function FolioPrintPage({ params }: { params: { id: string 
                       <td className="py-1.5 px-2 text-slate-700">{fc.charge.item}</td>
                       <td className={`py-1.5 px-2 text-right font-medium ${fc.charge.amount < 0 ? 'text-emerald-700' : 'text-slate-800'}`}>
                         {fc.charge.amount < 0
-                          ? `(฿${fmtCurrency(Math.abs(fc.charge.amount))})`
-                          : `฿${fmtCurrency(fc.charge.amount)}`}
+                          ? `(${sym}${fmtCurrency(Math.abs(fc.charge.amount))})`
+                          : `${sym}${fmtCurrency(fc.charge.amount)}`}
                       </td>
                     </tr>
                   ))}
@@ -134,7 +136,7 @@ export default async function FolioPrintPage({ params }: { params: { id: string 
                 <tfoot>
                   <tr className="border-t-2 border-slate-300">
                     <td colSpan={2} className="pt-2 px-2 font-black text-slate-700 text-sm">Folio Total</td>
-                    <td className="pt-2 px-2 text-right font-black text-slate-900">฿{fmtCurrency(folioTotal(folio) + roomProjection(folio, reservation))}</td>
+                    <td className="pt-2 px-2 text-right font-black text-slate-900">{sym}{fmtCurrency(folioTotal(folio) + roomProjection(folio, reservation))}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -147,7 +149,7 @@ export default async function FolioPrintPage({ params }: { params: { id: string 
           <div className="flex justify-end border-t-2 border-slate-800 pt-3 mb-8">
             <div className="text-right">
               <span className="text-xs uppercase tracking-widest text-slate-500 mr-6">Grand Total</span>
-              <span className="text-xl font-black text-slate-900">฿{fmtCurrency(grandTotal)}</span>
+              <span className="text-xl font-black text-slate-900">{sym}{fmtCurrency(grandTotal)}</span>
               {setting && setting.fxRate > 0 && grandTotal > 0 && (
                 <p className="text-xs text-slate-400 mt-0.5">
                   ≈ {formatMoney(baseToAlt(grandTotal, setting.fxRate), setting.altCurrency)} at {setting.fxRate} {setting.baseCurrency}/{setting.altCurrency}

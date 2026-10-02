@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Wallet, Play, Lock, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { toast } from '@/lib/toast'
+import { cur } from '@/lib/money'
 
 const inputCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent'
 
@@ -30,7 +31,7 @@ function fmtDT(d: string | null | undefined) {
 }
 
 function fmtB(n: number) {
-  return `฿${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+  return `${cur()}${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
 }
 
 export default function ShiftPage() {
@@ -136,7 +137,7 @@ export default function ShiftPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Counted Cash (฿)</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Counted Cash ({cur()})</label>
               <input
                 type="number" min={0} step={0.01} placeholder="0.00"
                 value={countedCash}
@@ -147,7 +148,7 @@ export default function ShiftPage() {
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Notes (optional)</label>
               <input
-                type="text" placeholder="e.g. ฿500 paid out for taxi refund"
+                type="text" placeholder={`e.g. ${cur()}500 paid out for taxi refund`}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className={`${inputCls} w-full mt-1`}
@@ -178,7 +179,7 @@ export default function ShiftPage() {
           </div>
           <div className="flex items-end gap-3">
             <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Opening Float (฿)</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Opening Float ({cur()})</label>
               <input
                 type="number" min={0} step={0.01} placeholder="0.00"
                 value={openingFloat}

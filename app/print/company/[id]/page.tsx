@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { currencySymbol } from '@/lib/currency'
 import PrintTrigger from './PrintTrigger'
 import PrintToolbar from './PrintToolbar'
 
@@ -20,7 +21,7 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
   const hotelId = (session.user as any).hotelId as string | undefined
   if (!hotelId) redirect('/login')
 
-  const [company, hotel] = await Promise.all([
+  const [company, hotel, setting] = await Promise.all([
     prisma.company.findFirst({
       where: { id: params.id, hotelId },
       include: {
@@ -30,9 +31,11 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
       },
     }),
     prisma.hotel.findUnique({ where: { id: hotelId } }),
+    prisma.hotelSetting.findUnique({ where: { id: hotelId }, select: { baseCurrency: true } }),
   ])
 
   if (!company) redirect('/companies')
+  const sym = currencySymbol(setting?.baseCurrency ?? 'THB').trim()
 
   const unpaid = company.creditTransactions.filter((t) => t.status === 'unpaid')
   const paid = company.creditTransactions.filter((t) => t.status === 'paid')
@@ -108,7 +111,7 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
           )}
           <div>
             <span className="text-slate-400 text-xs uppercase tracking-wide">Credit Limit</span>
-            <p className="font-bold text-slate-800">฿{fmtCurrency(company.creditLimit)}</p>
+            <p className="font-bold text-slate-800">{sym}{fmtCurrency(company.creditLimit)}</p>
           </div>
           <div>
             <span className="text-slate-400 text-xs uppercase tracking-wide">Statement Date</span>
@@ -138,7 +141,7 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
                   <tr key={tx.id} className="border-b border-slate-100">
                     <td className="py-1.5 px-2 text-slate-400 text-xs">{fmt(tx.createdAt)}</td>
                     <td className="py-1.5 px-2 text-slate-700">{tx.description}</td>
-                    <td className="py-1.5 px-2 text-right font-medium text-slate-800">฿{fmtCurrency(tx.amount)}</td>
+                    <td className="py-1.5 px-2 text-right font-medium text-slate-800">{sym}{fmtCurrency(tx.amount)}</td>
                     <td className="py-1.5 px-2 text-center">
                       <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px] font-bold uppercase">Unpaid</span>
                     </td>
@@ -151,7 +154,7 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
                     Total Outstanding
                   </td>
                   <td className="pt-3 px-2 text-right font-black text-slate-900 text-lg">
-                    ฿{fmtCurrency(totalOutstanding)}
+                    {sym}{fmtCurrency(totalOutstanding)}
                   </td>
                   <td />
                 </tr>
@@ -180,7 +183,7 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
                   <tr key={tx.id} className="border-b border-slate-100 opacity-60">
                     <td className="py-1.5 px-2 text-slate-400 text-xs">{fmt(tx.createdAt)}</td>
                     <td className="py-1.5 px-2 text-slate-700">{tx.description}</td>
-                    <td className="py-1.5 px-2 text-right font-medium text-slate-600">฿{fmtCurrency(tx.amount)}</td>
+                    <td className="py-1.5 px-2 text-right font-medium text-slate-600">{sym}{fmtCurrency(tx.amount)}</td>
                     <td className="py-1.5 px-2 text-center">
                       <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold uppercase">Paid</span>
                     </td>
@@ -192,7 +195,7 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
                   <td colSpan={2} className="pt-2 px-2 font-bold text-slate-500 text-xs uppercase tracking-wide">
                     Total Paid
                   </td>
-                  <td className="pt-2 px-2 text-right font-bold text-slate-500">฿{fmtCurrency(totalPaid)}</td>
+                  <td className="pt-2 px-2 text-right font-bold text-slate-500">{sym}{fmtCurrency(totalPaid)}</td>
                   <td />
                 </tr>
               </tfoot>

@@ -9,6 +9,7 @@ import { getFoliosPromise, prefetchFolios } from '@/lib/folio-prefetch'
 import { toast } from '@/lib/toast'
 import { formatMoney, baseToAlt, type HotelSetting } from '@/lib/currency'
 import { todayIn } from '@/lib/dates'
+import { cur } from '@/lib/money'
 
 interface Props {
   reservation: Reservation
@@ -270,7 +271,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
         setCreditError(data.error ?? 'Could not transfer to master bill')
         return
       }
-      toast(`฿${Number(data.transferred ?? 0).toLocaleString()} transferred to master ${data.masterResNumber}`)
+      toast(`${cur()}${Number(data.transferred ?? 0).toLocaleString()} transferred to master ${data.masterResNumber}`)
       await refreshFolios()
     } finally {
       setBillingToMaster(false)
@@ -456,8 +457,8 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                               <td className="py-2 text-center text-[10px] text-slate-400">{fc.charge.category ?? '—'}</td>
                               <td className={`py-2 text-right text-[12px] font-black ${fc.charge.amount < 0 ? 'text-teal-600' : 'text-slate-900'}`}>
                                 {fc.charge.amount < 0
-                                  ? `(฿${formatCurrency(Math.abs(fc.charge.amount))})`
-                                  : `฿${formatCurrency(fc.charge.amount)}`}
+                                  ? `(${cur()}${formatCurrency(Math.abs(fc.charge.amount))})`
+                                  : `${cur()}${formatCurrency(fc.charge.amount)}`}
                               </td>
                               {folios.length > 1 && activeFolio.status !== 'settled' && (
                                 <td className="py-2 pl-1 relative">
@@ -495,7 +496,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                                 Total
                               </td>
                               <td className="pt-3 text-right text-sm font-black text-slate-900">
-                                ฿{formatCurrency(folioBalance(activeFolio, effRes))}
+                                {cur()}{formatCurrency(folioBalance(activeFolio, effRes))}
                               </td>
                               {folios.length > 1 && activeFolio.status !== 'settled' && <td />}
                             </tr>
@@ -512,7 +513,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                             {unassignedCharges.map((c) => (
                               <div key={c.id} className="flex items-center gap-3">
                                 <span className="text-xs text-slate-700 flex-1">{c.item}</span>
-                                <span className="text-xs font-bold text-slate-800">฿{formatCurrency(c.amount)}</span>
+                                <span className="text-xs font-bold text-slate-800">{cur()}{formatCurrency(c.amount)}</span>
                                 <div className="flex gap-1">
                                   {folios.map((f) => (
                                     <button
@@ -543,7 +544,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                           {activeFolio.name} Balance
                         </p>
                         <p className={`text-3xl font-mono font-black leading-none ${activeBalance <= 0 ? 'text-teal-600' : 'text-slate-900'}`}>
-                          ฿{formatCurrency(activeBalance)}
+                          {cur()}{formatCurrency(activeBalance)}
                         </p>
                         {hotelSetting && hotelSetting.fxRate > 0 && activeBalance > 0 && (
                           <p className="text-[11px] text-slate-400 mt-1">
@@ -641,7 +642,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                                       <span className="text-[9px] text-slate-400">(No credit account)</span>
                                     )}
                                     {isCompanyCredit && canCompanyCredit && creditExceeded && (
-                                      <span className="text-[9px] font-bold text-red-500">฿0 available</span>
+                                      <span className="text-[9px] font-bold text-red-500">{cur()}0 available</span>
                                     )}
                                   </label>
                                 )
@@ -670,7 +671,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                                   <>
                                     <div className="flex justify-between text-xs mb-1.5">
                                       <span className="font-semibold text-sky-700">
-                                        Available: ฿{creditAvailable.toLocaleString()} of ฿{creditLimit.toLocaleString()}
+                                        Available: {cur()}{creditAvailable.toLocaleString()} of {cur()}{creditLimit.toLocaleString()}
                                       </span>
                                       <span className="text-sky-500">{creditPct}% used</span>
                                     </div>
@@ -723,16 +724,16 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Cash</p>
                               <input
                                 type="number"
-                                placeholder="Amount Tendered ฿"
+                                placeholder={`Amount Tendered ${cur()}`}
                                 value={cashTendered}
                                 onChange={(e) => setCashTendered(e.target.value)}
                                 className={inputCls}
                               />
                               {cashTendered.trim() !== '' && cashChange > 0 && (
-                                <p className="text-xs font-bold text-teal-600 mt-1.5">Change: ฿{cashChange.toLocaleString()}</p>
+                                <p className="text-xs font-bold text-teal-600 mt-1.5">Change: {cur()}{cashChange.toLocaleString()}</p>
                               )}
                               {cashTendered.trim() !== '' && activeBalance > 0 && parseFloat(cashTendered) < activeBalance && (
-                                <p className="text-xs font-bold text-red-500 mt-1.5">Short ฿{formatCurrency(activeBalance - parseFloat(cashTendered))}</p>
+                                <p className="text-xs font-bold text-red-500 mt-1.5">Short {cur()}{formatCurrency(activeBalance - parseFloat(cashTendered))}</p>
                               )}
                             </div>
                           )}
@@ -829,12 +830,12 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
                               <span className="px-1.5 py-0.5 bg-slate-100 text-slate-400 rounded text-[9px] font-bold">Open</span>
                             )}
                           </span>
-                          <span className="font-bold text-slate-800">฿{formatCurrency(folioBalance(f, effRes))}</span>
+                          <span className="font-bold text-slate-800">{cur()}{formatCurrency(folioBalance(f, effRes))}</span>
                         </div>
                       ))}
                       <div className="flex justify-between text-xs font-black text-slate-900 border-t border-slate-200 mt-2 pt-2">
                         <span>Total</span>
-                        <span>฿{formatCurrency(totalBalance)}</span>
+                        <span>{cur()}{formatCurrency(totalBalance)}</span>
                       </div>
                     </div>
                   )}

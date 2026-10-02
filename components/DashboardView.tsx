@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { todayIn } from '@/lib/dates'
+import { cur } from '@/lib/money'
 
 interface Props {
   rooms: Room[]
@@ -338,7 +339,7 @@ export default function DashboardView({
                         </span>
                       </td>
                       <td className="px-4 py-3 font-black text-slate-900">
-                        ฿{res.totalAmount.toLocaleString()}
+                        {cur()}{res.totalAmount.toLocaleString()}
                       </td>
                       <td className="px-4 py-3">
                         <button

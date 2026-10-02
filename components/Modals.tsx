@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { todayIn, addDays } from '@/lib/dates'
 import { useRoomTypes, rackRateFor } from '@/lib/useRoomTypes'
+import { cur } from '@/lib/money'
 
 // Fetches the hotel currency setting; null until loaded (modals fall back to base-only)
 function useHotelSetting(): HotelSetting | null {
@@ -316,12 +317,12 @@ export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }
           <FormField label="Check Out" required>
             <input type="date" value={form.checkOut} min={form.checkIn || today} onChange={(e) => set('checkOut', e.target.value)} className={inputCls} />
           </FormField>
-          <FormField label="Rate / Night (฿)">
+          <FormField label={`Rate / Night (${cur()})`}>
             <input type="number" value={form.rate} onChange={(e) => set('rate', parseFloat(e.target.value))} className={inputCls} />
           </FormField>
           <div>
             <FormField label="Nights">
-              <div className={`${inputCls} bg-gray-50 text-gray-600`}>{nights} nights · ฿{total.toLocaleString()}</div>
+              <div className={`${inputCls} bg-gray-50 text-gray-600`}>{nights} nights · {cur()}{total.toLocaleString()}</div>
             </FormField>
           </div>
           <FormField label="Adults">
@@ -451,13 +452,13 @@ export function MoveRoomModal({ reservation: res, rooms, onConfirm, onClose }: M
         {selectedRoom && diff !== 0 && (
           <div className="bg-gray-50 rounded-xl p-3 space-y-2">
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-              {diff > 0 ? `Upgrade — ฿${diff} more/night` : `Downgrade — ฿${Math.abs(diff)} less/night`}
+              {diff > 0 ? `Upgrade — ${cur()}${diff} more/night` : `Downgrade — ${cur()}${Math.abs(diff)} less/night`}
             </p>
             {diff > 0 ? (
               <>
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="radio" name="pricingAction" value="charge_diff" checked={pricingAction === 'charge_diff'} onChange={() => setPricingAction('charge_diff')} />
-                  Charge difference (฿{(diff * res.totalNights).toLocaleString()} total)
+                  Charge difference ({cur()}{(diff * res.totalNights).toLocaleString()} total)
                 </label>
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="radio" name="pricingAction" value="complimentary" checked={pricingAction === 'complimentary'} onChange={() => setPricingAction('complimentary')} />
@@ -472,7 +473,7 @@ export function MoveRoomModal({ reservation: res, rooms, onConfirm, onClose }: M
                 </label>
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="radio" name="pricingAction" value="credit_diff" checked={pricingAction === 'credit_diff'} onChange={() => setPricingAction('credit_diff')} />
-                  Credit difference (฿{(Math.abs(diff) * res.totalNights).toLocaleString()} total)
+                  Credit difference ({cur()}{(Math.abs(diff) * res.totalNights).toLocaleString()} total)
                 </label>
               </>
             )}
@@ -546,7 +547,7 @@ export function ExtendStayModal({ reservation: res, onConfirm, onClose }: Extend
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Extra Charge</span>
-            <span className="font-semibold text-gray-900">฿{(extraNights * res.rate).toLocaleString()}</span>
+            <span className="font-semibold text-gray-900">{cur()}{(extraNights * res.rate).toLocaleString()}</span>
           </div>
         </div>
 
@@ -683,7 +684,7 @@ export function AddChargeModal({ reservation: res, onConfirm, onClose }: AddChar
                     <span className="text-xs text-gray-500">{c.category}</span>
                     <span className={`text-sm font-medium ${c.parentCode ? 'text-gray-500 pl-2' : 'text-gray-800'}`}>{c.description}</span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">฿{c.price.toLocaleString()}</span>
+                  <span className="text-sm font-bold text-gray-900">{cur()}{c.price.toLocaleString()}</span>
                 </button>
               ))}
               <button
@@ -709,7 +710,7 @@ export function AddChargeModal({ reservation: res, onConfirm, onClose }: AddChar
         </FormField>
 
         <div className="grid grid-cols-2 gap-3">
-          <FormField label="Amount (฿)" required>
+          <FormField label={`Amount (${cur()})`} required>
             <input type="number" min={0} step={0.01} placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} />
           </FormField>
           <FormField label="Date">
@@ -797,7 +798,7 @@ export function PostPaymentModal({ reservation: res, onConfirm, onClose }: PostP
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-600">Balance Due</span>
-            <span className="font-bold text-green-700">฿{balance.toLocaleString()}</span>
+            <span className="font-bold text-green-700">{cur()}{balance.toLocaleString()}</span>
           </div>
         </div>
         <FormField label="Payment Method" required>
@@ -823,8 +824,8 @@ export function PostPaymentModal({ reservation: res, onConfirm, onClose }: PostP
                 </div>
                 {res.company!.creditLimit > 0 && (
                   <p className="text-xs text-slate-600">
-                    Available credit: <span className="font-bold text-sky-700">฿{creditAvailable.toLocaleString()}</span>
-                    {' '}of ฿{res.company!.creditLimit.toLocaleString()}
+                    Available credit: <span className="font-bold text-sky-700">{cur()}{creditAvailable.toLocaleString()}</span>
+                    {' '}of {cur()}{res.company!.creditLimit.toLocaleString()}
                   </p>
                 )}
                 {(res.company!.bankName || res.company!.bankAccountNumber) && (
@@ -938,11 +939,11 @@ export function RecordDepositModal({ reservation: res, onSaved, onClose }: Recor
         <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 text-sm space-y-1">
           <div className="flex justify-between">
             <span className="text-gray-600">Reservation Total</span>
-            <span className="font-bold text-slate-800">฿{res.totalAmount.toLocaleString()}</span>
+            <span className="font-bold text-slate-800">{cur()}{res.totalAmount.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Deposits Received</span>
-            <span className="font-bold text-violet-700">฿{depositsPaid.toLocaleString()}</span>
+            <span className="font-bold text-violet-700">{cur()}{depositsPaid.toLocaleString()}</span>
           </div>
         </div>
 

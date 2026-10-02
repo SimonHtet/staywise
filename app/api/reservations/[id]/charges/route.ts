@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { audited } from '@/lib/audit'
+import { hotelAmountCap } from '@/lib/limits'
+import { formatMoney } from '@/lib/currency'
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
@@ -34,8 +36,9 @@ async function POST_handler(
   if (parsedAmount === 0) {
     return NextResponse.json({ error: 'Amount cannot be zero' }, { status: 400 })
   }
-  if (Math.abs(parsedAmount) > 500000) {
-    return NextResponse.json({ error: 'Amount exceeds maximum allowed (฿500,000)' }, { status: 400 })
+  const { cap, currency: capCur } = await hotelAmountCap(hotelId!)
+  if (Math.abs(parsedAmount) > cap) {
+    return NextResponse.json({ error: `Amount exceeds the maximum for one entry (${formatMoney(cap, capCur)})` }, { status: 400 })
   }
 
   if (!date || !DATE_REGEX.test(date)) {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { TrendingUp, Hotel, DollarSign, BarChart3, Users, Search, RefreshCw } from 'lucide-react'
 import { todayIn, addDays } from '@/lib/dates'
+import { cur } from '@/lib/money'
 
 interface DailyRevenue {
   date: string
@@ -79,7 +80,7 @@ function BarChart({ data, valueKey, labelKey, colorClass = 'bg-sky-500' }: {
             />
             <span className="absolute right-2 top-0 h-full flex items-center text-xs font-medium text-gray-700">
               {typeof item[valueKey] === 'number' && (item[valueKey] as number) > 999
-                ? `฿${((item[valueKey] as number) / 1000).toFixed(0)}k`
+                ? `${cur()}${((item[valueKey] as number) / 1000).toFixed(0)}k`
                 : item[valueKey] as string}
             </span>
           </div>
@@ -148,12 +149,12 @@ function ColumnChart({
                 <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 z-20 bg-white border border-gray-200 rounded-xl shadow-lg px-3 py-2 text-xs whitespace-nowrap pointer-events-none">
                   <p className="font-bold text-gray-800 mb-1">{d.date}</p>
                   <div className="space-y-0.5">
-                    <div className="flex justify-between gap-4"><span className="text-gray-500">Room</span><span className="font-semibold">฿{d.roomRevenue.toLocaleString()}</span></div>
-                    <div className="flex justify-between gap-4"><span className="text-gray-500">Extras</span><span className="font-semibold text-emerald-600">+฿{d.extraCharges.toLocaleString()}</span></div>
-                    <div className="flex justify-between gap-4"><span className="text-gray-500">Payments</span><span className="font-semibold text-teal-600">-฿{d.payments.toLocaleString()}</span></div>
-                    <div className="flex justify-between gap-4 border-t border-gray-100 pt-1"><span className="font-bold text-gray-700">Net</span><span className={`font-bold ${d.netTotal < 0 ? 'text-rose-600' : 'text-gray-900'}`}>฿{d.netTotal.toLocaleString()}</span></div>
+                    <div className="flex justify-between gap-4"><span className="text-gray-500">Room</span><span className="font-semibold">{cur()}{d.roomRevenue.toLocaleString()}</span></div>
+                    <div className="flex justify-between gap-4"><span className="text-gray-500">Extras</span><span className="font-semibold text-emerald-600">+{cur()}{d.extraCharges.toLocaleString()}</span></div>
+                    <div className="flex justify-between gap-4"><span className="text-gray-500">Payments</span><span className="font-semibold text-teal-600">-{cur()}{d.payments.toLocaleString()}</span></div>
+                    <div className="flex justify-between gap-4 border-t border-gray-100 pt-1"><span className="font-bold text-gray-700">Net</span><span className={`font-bold ${d.netTotal < 0 ? 'text-rose-600' : 'text-gray-900'}`}>{cur()}{d.netTotal.toLocaleString()}</span></div>
                     {showCompare && sampledCmp[i] && (
-                      <div className="flex justify-between gap-4 border-t border-gray-100 pt-1"><span className="text-slate-400">Last Year</span><span className="text-slate-500">฿{(sampledCmp[i].roomRevenue + sampledCmp[i].extraCharges).toLocaleString()}</span></div>
+                      <div className="flex justify-between gap-4 border-t border-gray-100 pt-1"><span className="text-slate-400">Last Year</span><span className="text-slate-500">{cur()}{(sampledCmp[i].roomRevenue + sampledCmp[i].extraCharges).toLocaleString()}</span></div>
                     )}
                   </div>
                 </div>
@@ -287,12 +288,12 @@ function TopDays({ data }: { data: DailyRevenue[] }) {
                   style={{ width: `${(d.netTotal / maxNet) * 100}%` }}
                 />
                 <span className="absolute right-2 top-0 h-full flex items-center text-[10px] font-bold text-gray-700">
-                  ฿{d.netTotal.toLocaleString()}
+                  {cur()}{d.netTotal.toLocaleString()}
                 </span>
               </div>
               <div className="text-right text-[10px] text-gray-400 w-20 shrink-0">
-                <div>Rm: ฿{d.roomRevenue.toLocaleString()}</div>
-                <div className="text-emerald-600">+฿{d.extraCharges.toLocaleString()}</div>
+                <div>Rm: {cur()}{d.roomRevenue.toLocaleString()}</div>
+                <div className="text-emerald-600">+{cur()}{d.extraCharges.toLocaleString()}</div>
               </div>
             </div>
           )
@@ -315,7 +316,7 @@ function SourceRevenueChart({ data }: { data: { source: string; count: number; r
               style={{ width: `${(item.revenue / maxRev) * 100}%` }}
             />
             <span className="absolute right-2 top-0 h-full flex items-center text-xs font-medium text-gray-700">
-              ฿{(item.revenue / 1000).toFixed(0)}k
+              {cur()}{(item.revenue / 1000).toFixed(0)}k
             </span>
           </div>
           <div className="text-[10px] text-gray-400 w-16 text-right shrink-0">{item.count} stays</div>
@@ -406,8 +407,8 @@ function AccountTable({ rows, title }: { rows: CompanyRevenue[]; title: string }
               <tr key={co.id ?? i} className="border-b border-gray-50 hover:bg-gray-50/50">
                 <td className="py-2 font-medium text-gray-800 max-w-[120px] truncate" title={co.name}>{co.name}</td>
                 <td className="py-2 text-right text-gray-600">{co.reservationCount}</td>
-                <td className="py-2 text-right font-semibold text-gray-900">฿{co.revenue.toLocaleString()}</td>
-                <td className="py-2 text-right text-gray-600">฿{co.avgRate.toLocaleString()}</td>
+                <td className="py-2 text-right font-semibold text-gray-900">{cur()}{co.revenue.toLocaleString()}</td>
+                <td className="py-2 text-right text-gray-600">{cur()}{co.avgRate.toLocaleString()}</td>
                 <td className="py-2 text-right text-gray-500">{co.lastStay ? co.lastStay.slice(5) : '—'}</td>
               </tr>
             ))}
@@ -509,10 +510,10 @@ export default function AnalyticsView() {
         <>
           {/* KPI cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard label="Total Revenue" value={`฿${(data.summary.totalRevenue / 1000).toFixed(0)}k`} sub={`${data.summary.totalRoomNights} room nights`} icon={DollarSign} color="bg-emerald-500" />
+            <KpiCard label="Total Revenue" value={`${cur()}${(data.summary.totalRevenue / 1000).toFixed(0)}k`} sub={`${data.summary.totalRoomNights} room nights`} icon={DollarSign} color="bg-emerald-500" />
             <KpiCard label="Avg Occupancy" value={`${data.summary.avgOccupancy}%`} sub="of total rooms" icon={Hotel} color="bg-sky-500" />
-            <KpiCard label="Avg Daily Rate" value={`฿${data.summary.avgRate.toLocaleString()}`} sub="per occupied room" icon={TrendingUp} color="bg-indigo-500" />
-            <KpiCard label="RevPAR" value={`฿${data.summary.revPar.toLocaleString()}`} sub="revenue per available room" icon={BarChart3} color="bg-purple-500" />
+            <KpiCard label="Avg Daily Rate" value={`${cur()}${data.summary.avgRate.toLocaleString()}`} sub="per occupied room" icon={TrendingUp} color="bg-indigo-500" />
+            <KpiCard label="RevPAR" value={`${cur()}${data.summary.revPar.toLocaleString()}`} sub="revenue per available room" icon={BarChart3} color="bg-purple-500" />
           </div>
 
           {/* Revenue column chart + daily table */}

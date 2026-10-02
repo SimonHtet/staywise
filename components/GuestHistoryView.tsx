@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Reservation, Guest } from '@/types'
 import { getResStatusBadge, getResStatusLabel, formatDate } from '@/lib/utils'
 import { Search, Star, User, Phone, Mail, Globe, ChevronDown, ChevronUp, BedDouble, History } from 'lucide-react'
+import { cur } from '@/lib/money'
 
 interface Props {
   reservations: Reservation[]
@@ -164,7 +165,7 @@ function RoomHistorySection({ reservations }: { reservations: Reservation[] }) {
               <span className="text-slate-400">·</span>
               <span className="text-slate-500">{formatDate(res.checkIn)} → {formatDate(res.checkOut)}</span>
               <span className="text-slate-400">·</span>
-              <span className="font-semibold text-slate-700">฿{res.rate.toLocaleString()}/n</span>
+              <span className="font-semibold text-slate-700">{cur()}{res.rate.toLocaleString()}/n</span>
               <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[9px] font-black ${getResStatusBadge(res.status)}`}>
                 {getResStatusLabel(res.status)}
               </span>
@@ -361,7 +362,7 @@ export default function GuestHistoryView({ reservations, onSelectReservation }: 
                     <p className="text-sm font-black text-slate-900">
                       {entry.totalStays} stay{entry.totalStays !== 1 ? 's' : ''}
                     </p>
-                    <p className="text-xs text-gray-500">฿{entry.totalSpend.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">{cur()}{entry.totalSpend.toLocaleString()}</p>
                   </div>
                   {isExpanded ? (
                     <ChevronUp className="w-4 h-4 text-slate-400" />

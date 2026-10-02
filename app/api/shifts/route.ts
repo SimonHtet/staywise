@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { audited } from '@/lib/audit'
+import { hotelAmountCap } from '@/lib/limits'
 
 // One cash drawer per hotel — a single open shift at a time.
 
@@ -38,7 +39,8 @@ async function POST_handler(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}))
   const openingFloat = parseFloat(body.openingFloat ?? 0)
-  if (isNaN(openingFloat) || openingFloat < 0 || openingFloat > 500000) {
+  const { cap } = await hotelAmountCap(hotelId!)
+  if (isNaN(openingFloat) || openingFloat < 0 || openingFloat > cap) {
     return NextResponse.json({ error: 'Opening float must be 0 or a positive amount' }, { status: 400 })
   }
 

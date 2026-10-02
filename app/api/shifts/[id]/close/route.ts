@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { audited } from '@/lib/audit'
+import { hotelAmountCap } from '@/lib/limits'
 
 // Blind cash drop: the clerk counts the drawer first, then the server reveals
 // the expected figure and logs the variance.
@@ -23,7 +24,8 @@ async function POST_handler(
 
   const body = await req.json().catch(() => ({}))
   const countedCash = parseFloat(body.countedCash)
-  if (isNaN(countedCash) || countedCash < 0 || countedCash > 10000000) {
+  const { cap } = await hotelAmountCap(hotelId!)
+  if (isNaN(countedCash) || countedCash < 0 || countedCash > cap * 20) {
     return NextResponse.json({ error: 'Counted cash must be 0 or a positive amount' }, { status: 400 })
   }
   const notes = typeof body.notes === 'string' ? body.notes.slice(0, 500) : null

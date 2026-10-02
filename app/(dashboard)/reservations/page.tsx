@@ -16,6 +16,7 @@ import {
   PostPaymentModal,
   AddTraceModal,
 } from '@/components/Modals'
+import { cur } from '@/lib/money'
 
 type ActiveModal =
   | 'checkout'
@@ -232,7 +233,7 @@ function ReservationsPageInner() {
       toast(d.error ?? 'Could not add charge', 'error')
       return
     }
-    toast(`Charge posted — ฿${Number(data.amount).toLocaleString()}`)
+    toast(`Charge posted — ${cur()}${Number(data.amount).toLocaleString()}`)
     setActiveModal(null)
     await afterAction()
   }
@@ -254,7 +255,7 @@ function ReservationsPageInner() {
       toast(d.error ?? 'Could not post payment', 'error')
       return
     }
-    toast(`Payment posted — ฿${Number(data.amount).toLocaleString()}`)
+    toast(`Payment posted — ${cur()}${Number(data.amount).toLocaleString()}`)
     setActiveModal(null)
     await afterAction()
   }

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { todayIn } from '@/lib/dates'
 import { useRoomTypes } from '@/lib/useRoomTypes'
+import { cur } from '@/lib/money'
 
 interface CreditSummary {
   creditLimit: number
@@ -216,7 +217,7 @@ export default function CompaniesView() {
                             : creditPct >= 70 ? 'bg-amber-100 text-amber-700'
                             : 'bg-emerald-100 text-emerald-700'
                           }`}>
-                            ฿{creditAvail.toLocaleString()} avail
+                            {cur()}{creditAvail.toLocaleString()} avail
                           </span>
                         )}
                         {!co.active && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">INACTIVE</span>}
@@ -240,7 +241,7 @@ export default function CompaniesView() {
                           return (
                             <span key={rt} className="flex items-center gap-1 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-700">
                               <BadgeDollarSign className="w-3 h-3" />
-                              {rtName} {disc}% off · ฿{contracted.toLocaleString()}
+                              {rtName} {disc}% off · {cur()}{contracted.toLocaleString()}
                             </span>
                           )
                         })}
@@ -377,10 +378,10 @@ function CreditSection({ credit, companyId, showPaid, onTogglePaid, onMarkPaid, 
       <div className="mb-3">
         <div className="flex justify-between text-xs mb-1">
           <span className="text-gray-500">
-            Used: <span className="font-semibold text-gray-700">฿{credit.creditUsed.toLocaleString()}</span>
+            Used: <span className="font-semibold text-gray-700">{cur()}{credit.creditUsed.toLocaleString()}</span>
           </span>
           <span className="text-gray-500">
-            Limit: <span className="font-semibold text-gray-700">฿{credit.creditLimit.toLocaleString()}</span>
+            Limit: <span className="font-semibold text-gray-700">{cur()}{credit.creditLimit.toLocaleString()}</span>
           </span>
         </div>
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -391,7 +392,7 @@ function CreditSection({ credit, companyId, showPaid, onTogglePaid, onMarkPaid, 
         </div>
         <div className="flex justify-between text-[10px] mt-1">
           <span className={`font-bold ${pct >= 90 ? 'text-red-500' : 'text-gray-500'}`}>{pct}% used</span>
-          <span className="text-emerald-600 font-semibold">฿{credit.creditAvailable.toLocaleString()} available</span>
+          <span className="text-emerald-600 font-semibold">{cur()}{credit.creditAvailable.toLocaleString()} available</span>
         </div>
       </div>
 
@@ -427,7 +428,7 @@ function CreditSection({ credit, companyId, showPaid, onTogglePaid, onMarkPaid, 
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="Amount ฿"
+              placeholder={`Amount ${cur()}`}
               value={postAmount}
               onChange={(e) => setPostAmount(e.target.value)}
               className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -459,7 +460,7 @@ function CreditSection({ credit, companyId, showPaid, onTogglePaid, onMarkPaid, 
                 <p className="font-medium text-gray-800 truncate">{tx.description}</p>
                 <p className="text-gray-400">{typeof tx.createdAt === 'string' ? tx.createdAt.split('T')[0] : ''}</p>
               </div>
-              <span className="font-bold text-gray-900 flex-shrink-0">฿{tx.amount.toLocaleString()}</span>
+              <span className="font-bold text-gray-900 flex-shrink-0">{cur()}{tx.amount.toLocaleString()}</span>
               <button
                 onClick={() => onMarkPaid(tx.id)}
                 className="flex-shrink-0 px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-lg text-[10px] font-semibold hover:bg-gray-50 transition-colors"
@@ -493,7 +494,7 @@ function CreditSection({ credit, companyId, showPaid, onTogglePaid, onMarkPaid, 
                     <p className="font-medium text-gray-700 truncate">{tx.description}</p>
                     <p className="text-gray-400">{typeof tx.createdAt === 'string' ? tx.createdAt.split('T')[0] : ''}</p>
                   </div>
-                  <span className="font-bold text-gray-600 flex-shrink-0">฿{tx.amount.toLocaleString()}</span>
+                  <span className="font-bold text-gray-600 flex-shrink-0">{cur()}{tx.amount.toLocaleString()}</span>
                   <span className="flex-shrink-0 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">Paid</span>
                 </div>
               ))}

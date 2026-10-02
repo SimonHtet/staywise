@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Plus, Pencil, Check, X, ToggleLeft, ToggleRight, Trash2, KeyRound, UserX, UserCheck, Wand2 } from 'lucide-react'
 import AuditLogSection from '@/components/AuditLogSection'
 import { toast } from '@/lib/toast'
+import { cur, setBaseCurrency } from '@/lib/money'
 
 const inputCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent'
 
@@ -187,6 +188,7 @@ export default function SettingsPage() {
     })
     setCurrencySaving(false)
     if (!res.ok) { const d = await res.json(); setCurrencyError(d.error || 'Failed'); return }
+    setBaseCurrency(currencyForm.baseCurrency)
     setCurrencySaved(true)
     setTimeout(() => setCurrencySaved(false), 2500)
   }
@@ -526,7 +528,7 @@ export default function SettingsPage() {
                   <th className="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-28">Room</th>
                   <th className="text-left px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-20">Floor</th>
                   <th className="text-left px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Type</th>
-                  <th className="text-right px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-40">Rate (฿/night)</th>
+                  <th className="text-right px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-40">Rate ({cur()}/night)</th>
                   <th className="px-6 py-3 w-20" />
                 </tr>
               </thead>
@@ -564,7 +566,7 @@ export default function SettingsPage() {
                         <td className="px-3 py-3 text-slate-500">{room.floor}</td>
                         <td className="px-3 py-3 text-slate-700">{room.type}</td>
                         <td className="px-3 py-3 text-right font-semibold text-gray-900">
-                          {room.rate > 0 ? `฿${room.rate.toLocaleString()}` : <span className="text-slate-400 font-normal">Not set</span>}
+                          {room.rate > 0 ? `${cur()}${room.rate.toLocaleString()}` : <span className="text-slate-400 font-normal">Not set</span>}
                         </td>
                         <td className="px-6 py-3">
                           <button
@@ -715,7 +717,7 @@ export default function SettingsPage() {
                     {topLevelCodes.map((c) => <option key={c.id} value={c.code}>{c.code} — {c.description}</option>)}
                   </select>
                   <input placeholder="Description" value={addForm.description} onChange={(e) => setAddForm(p => ({ ...p, description: e.target.value }))} className={`${inputCls} col-span-2`} />
-                  <input type="number" placeholder="Price (฿)" value={addForm.price} onChange={(e) => setAddForm(p => ({ ...p, price: e.target.value }))} className={inputCls} />
+                  <input type="number" placeholder={`Price (${cur()})`} value={addForm.price} onChange={(e) => setAddForm(p => ({ ...p, price: e.target.value }))} className={inputCls} />
                 </div>
                 {saveError && <p className="text-xs text-red-600 mt-2">{saveError}</p>}
                 <div className="flex gap-2 mt-3">
@@ -732,7 +734,7 @@ export default function SettingsPage() {
                   <th className="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-20">Code</th>
                   <th className="text-left px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-32">Category</th>
                   <th className="text-left px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Description</th>
-                  <th className="text-right px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-28">Price (฿)</th>
+                  <th className="text-right px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-28">Price ({cur()})</th>
                   <th className="text-center px-3 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide w-20">Status</th>
                   {isAdmin && <th className="px-6 py-3 w-24" />}
                 </tr>
@@ -779,7 +781,7 @@ export default function SettingsPage() {
                             </td>
                             <td className="px-3 py-3 text-gray-500">{code.category}</td>
                             <td className="px-3 py-3 text-gray-800">{code.description}</td>
-                            <td className="px-3 py-3 text-right font-semibold text-gray-900">฿{code.price.toLocaleString()}</td>
+                            <td className="px-3 py-3 text-right font-semibold text-gray-900">{cur()}{code.price.toLocaleString()}</td>
                             <td className="px-3 py-3 text-center">
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${code.active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-400'}`}>
                                 {code.active ? 'Active' : 'Inactive'}

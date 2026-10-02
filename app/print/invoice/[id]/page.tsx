@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { HOTEL_NAME, LOCATION } from '@/lib/constants'
+import { currencySymbol } from '@/lib/currency'
 import { TaxInvoiceLineItem } from '@/types'
 import PrintTrigger from './PrintTrigger'
 import PrintToolbar from './PrintToolbar'
@@ -10,8 +10,9 @@ import PrintToolbar from './PrintToolbar'
 function fmtDate(d: Date | string) {
   return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
-function fmtMoney(n: number) {
-  return '฿' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+function moneyFormatter(code: string) {
+  const sym = currencySymbol(code).trim()
+  return (n: number) => sym + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -28,11 +29,17 @@ export default async function PrintInvoicePage({ params }: { params: { id: strin
   const hotelId = (session.user as any).hotelId as string | undefined
   if (!hotelId) redirect('/login')
 
-  const invoice = await prisma.taxInvoice.findFirst({
-    where: { id: params.id, hotelId },
-    include: { company: true },
-  })
+  const [invoice, hotel, setting] = await Promise.all([
+    prisma.taxInvoice.findFirst({
+      where: { id: params.id, hotelId },
+      include: { company: true },
+    }),
+    prisma.hotel.findUnique({ where: { id: hotelId } }),
+    prisma.hotelSetting.findUnique({ where: { id: hotelId }, select: { baseCurrency: true } }),
+  ])
   if (!invoice) notFound()
+  const fmtMoney = moneyFormatter(setting?.baseCurrency ?? 'THB')
+  const hotelName = hotel?.name ?? ''
 
   const lineItems = invoice.lineItems as unknown as TaxInvoiceLineItem[]
   const issuedDate = fmtDate(invoice.issuedAt ?? invoice.createdAt)
@@ -61,11 +68,15 @@ export default async function PrintInvoicePage({ params }: { params: { id: strin
         {/* Header */}
         <div className="flex justify-between items-start pb-5 border-b-2 border-slate-800 mb-6">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase">
-              {HOTEL_NAME}<span className="text-sky-400">.</span>
-            </h1>
-            <p className="text-xs text-slate-400 uppercase tracking-widest mt-0.5">Property Management</p>
-            <p className="text-xs text-slate-400 mt-1">{LOCATION}</p>
+            {hotel?.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={hotel.logoUrl} alt="" className="mb-2 h-12 w-12 object-contain" />
+            )}
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{hotelName}</h1>
+            {hotel?.address && <p className="text-xs text-slate-600 mt-1">{hotel.address}</p>}
+            {hotel?.location && <p className="text-xs text-slate-600">{hotel.location}</p>}
+            {hotel?.phone && <p className="text-xs text-slate-600">Tel {hotel.phone}</p>}
+            {hotel?.taxId && <p className="text-xs font-semibold text-slate-800 mt-1">Tax ID {hotel.taxId}</p>}
           </div>
           <div className="text-right">
             <p className="text-2xl font-black text-slate-900 uppercase tracking-tight">TAX INVOICE</p>
@@ -153,7 +164,7 @@ export default async function PrintInvoicePage({ params }: { params: { id: strin
         <div className="mt-10 pt-6 border-t border-slate-200 grid grid-cols-2 gap-16">
           <div>
             <div className="h-10 border-b-2 border-dashed border-slate-300 mb-1" />
-            <p className="text-xs text-slate-400 text-center">Authorised By — {HOTEL_NAME}</p>
+            <p className="text-xs text-slate-400 text-center">Authorised by {hotelName}</p>
           </div>
           <div>
             <div className="h-10 border-b-2 border-dashed border-slate-300 mb-1" />

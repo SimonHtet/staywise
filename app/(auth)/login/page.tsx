@@ -53,7 +53,9 @@ export default function LoginPage() {
 
     if (result?.error) {
       setLoading(false)
-      setError('Invalid email or password')
+      // Same message for wrong password, unknown email, deactivated account and
+      // too many attempts — don't tell an attacker which one it was
+      setError('Email or password is incorrect. After 5 tries, wait 15 minutes.')
     } else {
       // Keep the overlay up while we navigate to the dashboard
       router.push('/')
@@ -138,29 +140,33 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sky-300/80 text-xs font-semibold uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-email" className="block text-sky-300/80 text-xs font-semibold uppercase tracking-wider mb-1.5">
                 Email
               </label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@staywise.com"
+                placeholder="you@yourhotel.com"
+                autoComplete="username"
                 className="w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-sky-300/80 text-xs font-semibold uppercase tracking-wider mb-1.5">
+              <label htmlFor="login-password" className="block text-sky-300/80 text-xs font-semibold uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
+                autoComplete="current-password"
                 className="w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all"
               />
             </div>
@@ -192,7 +198,7 @@ export default function LoginPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.6 }}
         >
-          STAYWISE RESORT &amp; SPA · Phuket, Thailand
+          Hotel management system
         </motion.p>
       </div>
     </div>

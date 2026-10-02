@@ -42,6 +42,7 @@ import {
   Star,
 } from 'lucide-react'
 import { todayIn } from '@/lib/dates'
+import { cur } from '@/lib/money'
 
 interface Props {
   reservation: Reservation
@@ -684,7 +685,7 @@ export default function ReservationDetailPanel({
                       Total Amount
                     </p>
                     <p className="text-2xl font-mono font-black leading-none text-slate-900">
-                      ฿{formatCurrency(localRes.totalAmount)}
+                      {cur()}{formatCurrency(localRes.totalAmount)}
                     </p>
                   </div>
                 </div>
@@ -848,7 +849,7 @@ export default function ReservationDetailPanel({
                         Daily Rate
                       </p>
                       <p className="text-[13px] font-medium text-slate-800">
-                        ฿{formatCurrency(localRes.rate)}
+                        {cur()}{formatCurrency(localRes.rate)}
                       </p>
                     </div>
                     <EditableField
@@ -938,8 +939,8 @@ export default function ReservationDetailPanel({
                         : rate.amount === 0
                         ? 'Manual charge'
                         : rate.perNight
-                        ? `฿${rate.amount} / night`
-                        : `฿${rate.amount} / stay`
+                        ? `${cur()}${rate.amount} / night`
+                        : `${cur()}${rate.amount} / stay`
                       return (
                         <div
                           key={id}
@@ -983,8 +984,8 @@ export default function ReservationDetailPanel({
                         : rate.amount === 0
                         ? 'Manual'
                         : rate.perNight
-                        ? `฿${rate.amount}/night`
-                        : `฿${rate.amount}/stay`
+                        ? `${cur()}${rate.amount}/night`
+                        : `${cur()}${rate.amount}/stay`
                       return (
                         <button
                           key={id}
@@ -1098,7 +1099,7 @@ export default function ReservationDetailPanel({
                           </td>
                           <td className="py-1.5 text-center font-bold">1</td>
                           <td className="py-1.5 text-right font-black text-slate-900">
-                            ฿{formatCurrency(localRes.rate * nights)}
+                            {cur()}{formatCurrency(localRes.rate * nights)}
                           </td>
                         </tr>
                         {displayCharges.map((c) => (
@@ -1115,8 +1116,8 @@ export default function ReservationDetailPanel({
                               }`}
                             >
                               {c.amount < 0
-                                ? `(฿${formatCurrency(Math.abs(c.amount))})`
-                                : `฿${formatCurrency(c.amount)}`}
+                                ? `(${cur()}${formatCurrency(Math.abs(c.amount))})`
+                                : `${cur()}${formatCurrency(c.amount)}`}
                             </td>
                           </tr>
                         ))}
@@ -1129,7 +1130,7 @@ export default function ReservationDetailPanel({
                             Total Charges
                           </p>
                           <p className="text-sm font-bold text-slate-600">
-                            ฿{formatCurrency(totalRoomAndCharges)}
+                            {cur()}{formatCurrency(totalRoomAndCharges)}
                           </p>
                         </div>
                         <div className="text-right">
@@ -1137,7 +1138,7 @@ export default function ReservationDetailPanel({
                             Total Payments
                           </p>
                           <p className="text-sm font-bold text-teal-600">
-                            ฿{formatCurrency(totalPayments)}
+                            {cur()}{formatCurrency(totalPayments)}
                           </p>
                         </div>
                         <div className="col-span-2 border-t border-slate-200 pt-2 text-right">
@@ -1149,7 +1150,7 @@ export default function ReservationDetailPanel({
                               balance > 0 ? 'text-rose-600' : 'text-teal-600'
                             }`}
                           >
-                            ฿{formatCurrency(balance)}
+                            {cur()}{formatCurrency(balance)}
                           </p>
                         </div>
                       </div>

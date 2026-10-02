@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Reservation, ReservationStatus } from '@/types'
 import { getResStatusBadge, getResStatusLabel, formatDate, formatCurrency } from '@/lib/utils'
 import { Search, Plus, LogIn, LogOut, ChevronRight } from 'lucide-react'
+import { cur } from '@/lib/money'
 
 interface Props {
   reservations: Reservation[]
@@ -167,7 +168,7 @@ export default function ReservationsView({
                   {formatDate(res.checkOut)}
                 </td>
                 <td className="px-4 py-3 font-black text-slate-900 whitespace-nowrap">
-                  ฿{formatCurrency(res.rate)}<span className="text-slate-400 font-medium text-xs">/n</span>
+                  {cur()}{formatCurrency(res.rate)}<span className="text-slate-400 font-medium text-xs">/n</span>
                 </td>
                 <td className="px-4 py-3">
                   <span

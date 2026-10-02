@@ -35,6 +35,7 @@ import { getResStatusBadge, getResStatusLabel } from '@/lib/utils'
 import { useT, TKey } from '@/lib/i18n'
 import Toaster from '@/components/Toaster'
 import BrandLoader from '@/components/loading/BrandLoader'
+import { cur, setBaseCurrency } from '@/lib/money'
 
 type NavItem = {
   href: string
@@ -108,7 +109,7 @@ function NightAuditClock({ canRun }: { canRun: boolean }) {
       const data = await res.json()
       if (res.ok) {
         setAuditRan(true)
-        setResult({ ok: true, msg: `${data.chargesPosted} charge${data.chargesPosted !== 1 ? 's' : ''} posted · ฿${data.totalAmount.toLocaleString()}` })
+        setResult({ ok: true, msg: `${data.chargesPosted} charge${data.chargesPosted !== 1 ? 's' : ''} posted · ${cur()}${data.totalAmount.toLocaleString()}` })
       } else {
         setResult({ ok: false, msg: data.error ?? 'Failed' })
       }
@@ -274,7 +275,9 @@ function GlobalSearch({ className = 'w-72', autoFocus = false }: { className?: s
   )
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({ children, currency }: { children: React.ReactNode; currency: string }) {
+  // Set before children render so every cur() call on first paint is right
+  setBaseCurrency(currency)
   const pathname = usePathname()
   const router = useRouter()
   const { data: session, status } = useSession()

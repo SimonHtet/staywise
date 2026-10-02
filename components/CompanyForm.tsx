@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Company } from '@/types'
 import { useRoomTypes } from '@/lib/useRoomTypes'
 import { X, Building2, AlertTriangle } from 'lucide-react'
+import { cur } from '@/lib/money'
 
 const inputCls = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent'
 const selectCls = `${inputCls} bg-white`
@@ -172,9 +173,9 @@ export default function CompanyForm({ initial, onSave, onClose }: Props) {
                       <span className="text-xs text-gray-500">% off</span>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-gray-400 line-through">฿{rack.toLocaleString()}</div>
+                      <div className="text-xs text-gray-400 line-through">{cur()}{rack.toLocaleString()}</div>
                       <div className={`text-sm font-semibold ${disc > 0 ? 'text-emerald-600' : 'text-gray-500'}`}>
-                        ฿{contracted.toLocaleString()}
+                        {cur()}{contracted.toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -222,7 +223,7 @@ export default function CompanyForm({ initial, onSave, onClose }: Props) {
             </div>
             <div className="p-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Credit Limit (฿)">
+                <Field label={`Credit Limit (${cur()})`}>
                   <input
                     type="number"
                     min={0}

@@ -7,6 +7,7 @@ import { Check, Plus, Trash2, Building, BedDouble, DoorOpen, Users } from 'lucid
 import { toast } from '@/lib/toast'
 import { refreshRoomTypes } from '@/lib/useRoomTypes'
 import { PageSkeleton } from '@/components/Skeletons'
+import { setBaseCurrency } from '@/lib/money'
 
 const inputCls =
   'w-full border border-slate-300 rounded-lg px-3 py-2.5 text-base sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent'
@@ -246,6 +247,7 @@ function HotelStep({
         return setError(s.data.error ?? 'Hotel saved, but the currency could not be changed')
       }
     }
+    setBaseCurrency(currency)
     setSaving(false)
     toast('Hotel details saved')
     onSaved()
