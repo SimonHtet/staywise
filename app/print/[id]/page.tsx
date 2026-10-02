@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { formatMoney, baseToAlt } from '@/lib/currency'
 import PrintControls from './PrintControls'
+import { folioTotal, roomProjection, stayNights as nights } from '@/lib/folio'
 
 function fmt(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -11,29 +12,6 @@ function fmt(dateStr: string) {
 
 function fmtCurrency(amount: number) {
   return new Intl.NumberFormat('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
-}
-
-function nights(checkIn: string, checkOut: string) {
-  const diff = new Date(checkOut).getTime() - new Date(checkIn).getTime()
-  return Math.max(1, Math.round(diff / 86400000))
-}
-
-function folioTotal(folio: { charges: { charge: { amount: number } }[] }) {
-  return folio.charges.reduce((sum, fc) => sum + fc.charge.amount, 0)
-}
-
-// Same formula as the check-out modal: Main carries the projected room cost
-// minus any nightly room charges already posted by night audit — otherwise a
-// stay where the audit never ran prints with no room fees at all.
-function roomProjection(
-  folio: { name: string; charges: { charge: { amount: number; category: string | null; item: string } }[] },
-  reservation: { rate: number; checkIn: string; checkOut: string }
-) {
-  if (folio.name.toLowerCase() !== 'main') return 0
-  const roomPosted = folio.charges
-    .filter((fc) => fc.charge.category === 'ROOM' && fc.charge.item.startsWith('Room Charge —'))
-    .reduce((s, fc) => s + fc.charge.amount, 0)
-  return Math.max(0, reservation.rate * nights(reservation.checkIn, reservation.checkOut) - roomPosted)
 }
 
 export default async function FolioPrintPage({ params }: { params: { id: string } }) {

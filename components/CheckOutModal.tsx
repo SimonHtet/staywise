@@ -851,6 +851,12 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
             >
               <Printer className="w-4 h-4" /> Print Folio
             </button>
+            <button
+              onClick={() => window.open(`/print/receipt/${res.id}`, '_blank')}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-sm font-black rounded-lg hover:bg-slate-50 transition-all"
+            >
+              <Printer className="w-4 h-4" /> Receipt 80mm
+            </button>
             <div className="flex-1" />
             {!allSettled && !loadingFolios && (
               <p className="text-xs text-amber-600 font-bold">
