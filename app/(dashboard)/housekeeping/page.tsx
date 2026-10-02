@@ -5,18 +5,22 @@ import { Room } from '@/types'
 import { Sparkles, BedDouble, Wrench, Ban, CheckCircle2 } from 'lucide-react'
 import { toast } from '@/lib/toast'
 import { PageSkeleton } from '@/components/Skeletons'
+import { useT, TKey } from '@/lib/i18n'
+import { useRoomTypes } from '@/lib/useRoomTypes'
 
-const STATUS_META: Record<string, { label: string; dot: string; card: string }> = {
-  dirty:       { label: 'Needs Cleaning', dot: 'bg-amber-500',   card: 'bg-amber-50 border-amber-200' },
-  available:   { label: 'Clean & Ready',  dot: 'bg-emerald-500', card: 'bg-emerald-50 border-emerald-200' },
-  occupied:    { label: 'Occupied',       dot: 'bg-blue-500',    card: 'bg-blue-50 border-blue-200' },
-  maintenance: { label: 'Maintenance',    dot: 'bg-red-500',     card: 'bg-red-50 border-red-200' },
-  blocked:     { label: 'Blocked',        dot: 'bg-gray-400',    card: 'bg-gray-50 border-gray-200' },
+const STATUS_META: Record<string, { label: TKey; dot: string; card: string }> = {
+  dirty:       { label: 'status.dirty',       dot: 'bg-amber-500',   card: 'bg-amber-50 border-amber-200' },
+  available:   { label: 'status.available',   dot: 'bg-emerald-500', card: 'bg-emerald-50 border-emerald-200' },
+  occupied:    { label: 'status.occupied',    dot: 'bg-blue-500',    card: 'bg-blue-50 border-blue-200' },
+  maintenance: { label: 'status.maintenance', dot: 'bg-red-500',     card: 'bg-red-50 border-red-200' },
+  blocked:     { label: 'status.blocked',     dot: 'bg-gray-400',    card: 'bg-gray-50 border-gray-200' },
 }
 
 const SECTION_ORDER = ['dirty', 'occupied', 'available', 'maintenance', 'blocked']
 
 export default function HousekeepingPage() {
+  const { t } = useT()
+  const { nameOf } = useRoomTypes()
   const [rooms, setRooms] = useState<Room[]>([])
   const [loading, setLoading] = useState(true)
   const [cleaningId, setCleaningId] = useState<string | null>(null)
@@ -46,7 +50,7 @@ export default function HousekeepingPage() {
         toast(data.error ?? 'Could not update room', 'error')
         return
       }
-      toast(`Room ${room.id} marked clean`)
+      toast(t('hk.marked', { room: room.id }))
       await load()
     } finally {
       setCleaningId(null)
@@ -63,23 +67,21 @@ export default function HousekeepingPage() {
   const dirtyCount = rooms.filter((r) => r.status === 'dirty').length
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" /> Housekeeping Board
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {dirtyCount === 0
-              ? 'All rooms are clean — nothing to do'
-              : `${dirtyCount} room${dirtyCount !== 1 ? 's' : ''} waiting to be cleaned`}
+          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-amber-500" aria-hidden /> {t('hk.title')}
+          </h2>
+          <p className="text-sm text-slate-600 mt-0.5">
+            {dirtyCount === 0 ? t('hk.allClean') : t('hk.waiting', { n: dirtyCount })}
           </p>
         </div>
-        <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-600">
           {SECTION_ORDER.map((s) => (
             <span key={s} className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${STATUS_META[s].dot}`} />
-              {STATUS_META[s].label}
+              <span className={`w-2 h-2 rounded-full ${STATUS_META[s].dot}`} aria-hidden />
+              {t(STATUS_META[s].label)}
             </span>
           ))}
         </div>
@@ -87,10 +89,10 @@ export default function HousekeepingPage() {
 
       {byStatus.map(({ status, rooms: sectionRooms }) => (
         <div key={status} className="mb-8">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${STATUS_META[status].dot}`} />
-            {STATUS_META[status].label} ({sectionRooms.length})
-          </p>
+          <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${STATUS_META[status].dot}`} aria-hidden />
+            {t(STATUS_META[status].label)} ({sectionRooms.length})
+          </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
             {sectionRooms.map((room) => (
               <div
@@ -104,16 +106,16 @@ export default function HousekeepingPage() {
                   {status === 'blocked' && <Ban className="w-3.5 h-3.5 text-gray-400" />}
                   {status === 'available' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
                 </div>
-                <p className="text-[10px] text-slate-500 capitalize mb-2">
-                  Floor {room.floor} · {room.type.toLowerCase()}
+                <p className="text-xs text-slate-600 mb-2">
+                  {t('hk.floor', { n: room.floor })} · {nameOf(room.type)}
                 </p>
                 {status === 'dirty' && (
                   <button
                     onClick={() => markClean(room)}
                     disabled={cleaningId === room.id}
-                    className="mt-auto w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-black rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                    className="mt-auto w-full min-h-[44px] py-2 bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
-                    {cleaningId === room.id ? '…' : (<><Sparkles className="w-3 h-3" /> Mark Clean</>)}
+                    {cleaningId === room.id ? '…' : (<><Sparkles className="w-4 h-4" aria-hidden /> {t('hk.markClean')}</>)}
                   </button>
                 )}
               </div>

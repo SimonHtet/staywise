@@ -7,7 +7,7 @@ import { audited } from '@/lib/audit'
 
 // POST /api/account/password — signed-in user changes their own password
 async function POST_handler(req: NextRequest) {
-  const { session, error } = await getSessionOrUnauthorized()
+  const { session, error } = await getSessionOrUnauthorized({ allowPendingPasswordChange: true })
   if (error) return error
   const userId = (session!.user as any).id as string
 

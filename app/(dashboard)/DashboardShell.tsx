@@ -12,7 +12,6 @@ import {
   Users,
   LogOut,
   Radio,
-  ChevronRight,
   BarChart3,
   Building2,
   Settings2,
@@ -25,35 +24,47 @@ import {
   Search,
   Wallet,
   FileBarChart,
+  Menu,
+  X,
+  UserCircle2,
+  Languages,
+  Wand2,
 } from 'lucide-react'
 import { hasPermission } from '@/lib/rbac'
-import { HOTEL_NAME, LOCATION } from '@/lib/constants'
 import { getResStatusBadge, getResStatusLabel } from '@/lib/utils'
+import { useT, TKey } from '@/lib/i18n'
 import Toaster from '@/components/Toaster'
+import BrandLoader from '@/components/loading/BrandLoader'
 
 type NavItem = {
   href: string
-  label: string
+  label: TKey
   icon: React.ComponentType<{ className?: string }>
   roles?: string[]
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/reservations', label: 'Reservations', icon: CalendarDays },
-  { href: '/timeline', label: 'Timeline', icon: Clock },
-  { href: '/rooms', label: 'Room Grid', icon: Grid3X3 },
-  { href: '/housekeeping', label: 'Housekeeping', icon: Sparkles },
-  { href: '/guests', label: 'Guest History', icon: Users },
-  { href: '/companies', label: 'Companies', icon: Building2 },
-  { href: '/shift', label: 'Shift / Cash', icon: Wallet, roles: ['admin', 'manager', 'front_desk'] },
-  { href: '/reports', label: 'Reports', icon: FileBarChart, roles: ['admin', 'manager', 'front_desk'] },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3, roles: ['admin', 'manager'] },
-  { href: '/accounting', label: 'Accounting', icon: Receipt, roles: ['admin', 'manager'] },
-  { href: '/settings', label: 'Settings', icon: Settings2, roles: ['admin', 'manager'] },
+  { href: '/', label: 'nav.dashboard', icon: LayoutDashboard },
+  { href: '/reservations', label: 'nav.reservations', icon: CalendarDays },
+  { href: '/timeline', label: 'nav.timeline', icon: Clock },
+  { href: '/rooms', label: 'nav.rooms', icon: Grid3X3 },
+  { href: '/housekeeping', label: 'nav.housekeeping', icon: Sparkles },
+  { href: '/guests', label: 'nav.guests', icon: Users },
+  { href: '/companies', label: 'nav.companies', icon: Building2 },
+  { href: '/shift', label: 'nav.shift', icon: Wallet, roles: ['admin', 'manager', 'front_desk'] },
+  { href: '/reports', label: 'nav.reports', icon: FileBarChart, roles: ['admin', 'manager', 'front_desk'] },
+  { href: '/analytics', label: 'nav.analytics', icon: BarChart3, roles: ['admin', 'manager'] },
+  { href: '/accounting', label: 'nav.accounting', icon: Receipt, roles: ['admin', 'manager'] },
+  { href: '/settings', label: 'nav.settings', icon: Settings2, roles: ['admin', 'manager'] },
 ]
 
+// Pages reachable from the account menu rather than the main nav
+const EXTRA_TITLES: Record<string, TKey> = { '/account': 'nav.account', '/setup': 'nav.setup' }
+
+type HotelInfo = { name: string; location: string; setupCompletedAt: string | null }
+
 function NightAuditClock({ canRun }: { canRun: boolean }) {
+  const { t } = useT()
   const [timeLeft, setTimeLeft] = useState('')
   const [currentTime, setCurrentTime] = useState('')
   const [auditRan, setAuditRan] = useState(false)
@@ -109,9 +120,7 @@ function NightAuditClock({ canRun }: { canRun: boolean }) {
 
   return (
     <div className="px-4 py-3 mx-2 mb-2 rounded-xl bg-white/5 border border-white/10">
-      <p className="text-[10px] text-sky-400/70 uppercase tracking-widest font-semibold mb-1">
-        Night Audit
-      </p>
+      <p className="text-xs text-sky-300/80 font-semibold mb-1">{t('audit.title')}</p>
       <p className="text-lg font-mono font-bold text-white">{timeLeft}</p>
       <p className="text-xs text-white/40 mt-0.5">{currentTime}</p>
 
@@ -120,37 +129,37 @@ function NightAuditClock({ canRun }: { canRun: boolean }) {
           {auditRan ? (
             <div className="flex items-center gap-1.5 text-emerald-400">
               <CheckCircle className="w-3 h-3" />
-              <span className="text-[10px] font-semibold">Audit complete</span>
+              <span className="text-xs font-semibold">{t('audit.done')}</span>
             </div>
           ) : confirming ? (
             <div className="space-y-1.5">
-              <p className="text-[10px] text-amber-300 font-semibold">Post room charges for all in-house guests?</p>
+              <p className="text-xs text-amber-300 font-semibold">{t('audit.confirm')}</p>
               <div className="flex gap-1.5">
                 <button
                   onClick={runAudit}
-                  className="flex-1 py-1 bg-amber-500 hover:bg-amber-400 text-white text-[10px] font-black rounded transition-colors"
+                  className="flex-1 py-1.5 bg-amber-500 hover:bg-amber-400 text-white text-xs font-bold rounded transition-colors"
                 >
-                  Confirm
+                  {t('audit.confirmYes')}
                 </button>
                 <button
                   onClick={() => setConfirming(false)}
-                  className="flex-1 py-1 bg-white/10 hover:bg-white/20 text-white/70 text-[10px] font-bold rounded transition-colors"
+                  className="flex-1 py-1.5 bg-white/10 hover:bg-white/20 text-white/70 text-xs font-bold rounded transition-colors"
                 >
-                  Cancel
+                  {t('audit.cancel')}
                 </button>
               </div>
             </div>
           ) : running ? (
             <div className="flex items-center gap-1.5 text-white/50">
               <Loader2 className="w-3 h-3 animate-spin" />
-              <span className="text-[10px]">Running...</span>
+              <span className="text-xs">{t('audit.running')}</span>
             </div>
           ) : (
             <button
               onClick={() => setConfirming(true)}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-sky-300 hover:text-sky-200 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold text-sky-300 hover:text-sky-200 transition-colors"
             >
-              <Play className="w-3 h-3" /> Run Audit
+              <Play className="w-3 h-3" /> {t('audit.run')}
             </button>
           )}
 
@@ -178,7 +187,8 @@ type SearchResult = {
   checkOut: string
 }
 
-function GlobalSearch() {
+function GlobalSearch({ className = 'w-72', autoFocus = false }: { className?: string; autoFocus?: boolean }) {
+  const { t } = useT()
   const router = useRouter()
   const [q, setQ] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -222,21 +232,23 @@ function GlobalSearch() {
   }
 
   return (
-    <div ref={boxRef} className="relative w-72">
+    <div ref={boxRef} className={`relative ${className}`}>
       <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus-within:ring-2 focus-within:ring-sky-400 focus-within:border-transparent transition-all">
         <Search className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
         <input
           value={q}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => { if (results.length > 0) setOpen(true) }}
-          placeholder="Search guest, reservation, room…"
-          className="flex-1 bg-transparent text-xs text-gray-800 placeholder-gray-400 focus:outline-none"
+          placeholder={t('shell.search')}
+          aria-label={t('shell.searchShort')}
+          autoFocus={autoFocus}
+          className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-500 focus:outline-none"
         />
       </div>
       {open && (
         <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
           {results.length === 0 ? (
-            <p className="px-3 py-3 text-xs text-gray-400 text-center">No matches</p>
+            <p className="px-3 py-3 text-xs text-gray-500 text-center">{t('shell.noMatches')}</p>
           ) : (
             results.map((r) => (
               <button
@@ -264,11 +276,53 @@ function GlobalSearch() {
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const { data: session } = useSession()
+  const router = useRouter()
+  const { data: session, status } = useSession()
+  const { t, lang, setLang } = useT()
   const userRole = (session?.user as any)?.role ?? ''
+  const mustChangePassword = Boolean((session?.user as any)?.mustChangePassword)
   const visibleNavItems = NAV_ITEMS.filter((n) => !n.roles || n.roles.includes(userRole))
 
-  const today = new Date().toLocaleDateString('en-US', {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [hotel, setHotel] = useState<HotelInfo | null>(null)
+  const drawerRef = useRef<HTMLElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    fetch('/api/hotel')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((h) => h && setHotel(h))
+      .catch(() => {})
+  }, [status, pathname === '/setup'])
+
+  // A temporary (admin-set) password must be replaced before anything else
+  useEffect(() => {
+    if (mustChangePassword && pathname !== '/account') router.replace('/account')
+  }, [mustChangePassword, pathname, router])
+
+  // Close the mobile drawer / search on navigation
+  useEffect(() => {
+    setMenuOpen(false)
+    setSearchOpen(false)
+  }, [pathname])
+
+  // Drawer: focus moves in on open; Escape closes and returns focus to the menu button
+  useEffect(() => {
+    if (!menuOpen) return
+    drawerRef.current?.querySelector<HTMLElement>('a, button')?.focus()
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+        menuButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
+  const today = new Date().toLocaleDateString(lang === 'my' ? 'my-MM' : 'en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -280,99 +334,184 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return pathname.startsWith(href)
   }
 
-  return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <aside
-        className="w-60 flex-shrink-0 flex flex-col"
-        style={{ backgroundColor: '#0F2044' }}
-      >
-        {/* Logo */}
-        <div className="px-5 pt-6 pb-4">
-          <h1 className="text-2xl font-black text-white tracking-tight">
+  if (status === 'loading') return <BrandLoader />
+
+  const pageTitleKey: TKey =
+    EXTRA_TITLES[pathname] ?? NAV_ITEMS.find((n) => isActive(n.href))?.label ?? 'nav.dashboard'
+  const showSetupBanner =
+    userRole === 'admin' && hotel && !hotel.setupCompletedAt && pathname !== '/setup' && !mustChangePassword
+  const hotelLine = hotel ? [hotel.name, hotel.location].filter(Boolean).join(', ') : ''
+
+  const sidebar = (
+    <>
+      {/* Logo */}
+      <div className="px-5 pt-6 pb-4 flex items-start justify-between">
+        <div className="min-w-0">
+          <p className="text-2xl font-black text-white tracking-tight">
             STAYWISE<span className="text-sky-400">.</span>
-          </h1>
-          <p className="text-sky-400/50 text-[10px] tracking-widest uppercase mt-0.5 font-medium">
-            Property Management
           </p>
+          <p className="text-white/60 text-xs mt-1 truncate max-w-[11rem]">{hotel?.name}</p>
         </div>
+        <button
+          onClick={() => {
+            setMenuOpen(false)
+            menuButtonRef.current?.focus()
+          }}
+          className="lg:hidden -mr-2 p-2 text-white/70 hover:text-white rounded-lg"
+          aria-label={t('nav.closeMenu')}
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        {/* Date */}
-        <div className="px-5 pb-4">
-          <p className="text-xs text-white/40">{today}</p>
-        </div>
+      {/* Date */}
+      <div className="px-5 pb-4">
+        <p className="text-xs text-white/50">{today}</p>
+      </div>
 
-        {/* Night audit */}
-        <NightAuditClock canRun={hasPermission((session?.user as any)?.role ?? '', 'POST_PAYMENT')} />
+      {/* Night audit */}
+      {!mustChangePassword && <NightAuditClock canRun={hasPermission(userRole, 'POST_PAYMENT')} />}
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
-          {visibleNavItems.map(({ href, label, icon: Icon }) => {
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto" aria-label="Main">
+        {!mustChangePassword &&
+          visibleNavItems.map(({ href, label, icon: Icon }) => {
             const active = isActive(href)
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
-                  active
-                    ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30'
-                    : 'text-white/60 hover:text-white hover:bg-white/10'
+                aria-current={active ? 'page' : undefined}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-150 ${
+                  active ? 'bg-sky-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
-                <span className="flex-1">{label}</span>
-                {active && <ChevronRight className="w-3 h-3 opacity-60" />}
+                <span className="flex-1">{t(label)}</span>
               </Link>
             )
           })}
-        </nav>
+      </nav>
 
-        {/* Footer */}
-        <div className="px-3 py-4 border-t border-white/10">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-7 h-7 rounded-full bg-sky-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-              {session?.user?.name?.charAt(0) ?? 'U'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white truncate">{session?.user?.name ?? 'Staff'}</p>
-              <p className="text-[10px] text-white/40 capitalize truncate">
-                {(session?.user as any)?.role?.replace('_', ' ') ?? 'Front Desk'}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="w-full flex items-center gap-3 px-3 py-2 text-white/50 hover:text-white hover:bg-white/10 rounded-xl text-xs font-medium transition-colors"
+      {/* Footer */}
+      <div className="px-3 py-4 border-t border-white/10 space-y-1">
+        <Link
+          href="/account"
+          className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-colors ${
+            pathname === '/account' ? 'bg-white/10' : 'hover:bg-white/10'
+          }`}
+        >
+          <div
+            className="w-7 h-7 rounded-full bg-sky-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+            aria-hidden
           >
-            <LogOut className="w-3.5 h-3.5" />
-            Sign Out
-          </button>
+            {session?.user?.name?.charAt(0) ?? 'U'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate">{session?.user?.name ?? 'Staff'}</p>
+            <p className="text-xs text-white/50 truncate">{t('nav.account')}</p>
+          </div>
+          <UserCircle2 className="w-4 h-4 text-white/40" aria-hidden />
+        </Link>
+        <button
+          onClick={() => setLang(lang === 'en' ? 'my' : 'en')}
+          className="w-full flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl text-sm font-medium transition-colors"
+          aria-label={t('shell.languageLabel')}
+        >
+          <Languages className="w-4 h-4" aria-hidden />
+          {t('shell.language')}
+        </button>
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="w-full flex items-center gap-3 px-3 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl text-sm font-medium transition-colors"
+        >
+          <LogOut className="w-4 h-4" aria-hidden />
+          {t('shell.signOut')}
+        </button>
+      </div>
+    </>
+  )
+
+  return (
+    <div className="flex h-[100dvh] overflow-hidden">
+      {/* Sidebar — static on large screens */}
+      <aside className="hidden lg:flex w-60 flex-shrink-0 flex-col bg-[#0F2044]">{sidebar}</aside>
+
+      {/* Sidebar — drawer on phones / tablets */}
+      {menuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-slate-900/50" onClick={() => setMenuOpen(false)} aria-hidden />
+          <aside
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+            className="absolute inset-y-0 left-0 w-72 max-w-[85vw] flex flex-col bg-[#0F2044] shadow-2xl"
+          >
+            {sidebar}
+          </aside>
         </div>
-      </aside>
+      )}
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header */}
-        <header className="flex-shrink-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-          <div>
-            <h2 className="font-semibold text-gray-900 text-sm">
-              {NAV_ITEMS.find((n) => isActive(n.href))?.label ?? 'Dashboard'}
-            </h2>
-            <p className="text-xs text-gray-400">{HOTEL_NAME} · {LOCATION}</p>
+        <header className="flex-shrink-0 bg-white border-b border-gray-200">
+          <div className="h-14 flex items-center justify-between gap-3 px-3 sm:px-6">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                ref={menuButtonRef}
+                onClick={() => setMenuOpen(true)}
+                className="lg:hidden p-2 -ml-1 text-slate-600 hover:bg-slate-100 rounded-lg"
+                aria-label={t('nav.openMenu')}
+                aria-expanded={menuOpen}
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="min-w-0">
+                <h1 className="font-semibold text-gray-900 text-sm truncate">{t(pageTitleKey)}</h1>
+                <p className="text-xs text-gray-500 truncate">{hotelLine}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              {!mustChangePassword && <GlobalSearch className="hidden md:block w-56 lg:w-72" />}
+              {!mustChangePassword && (
+                <button
+                  onClick={() => setSearchOpen((v) => !v)}
+                  className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                  aria-label={t('shell.searchShort')}
+                  aria-expanded={searchOpen}
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              )}
+              <span className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-semibold text-emerald-700">
+                <Radio className="w-2.5 h-2.5 motion-safe:animate-pulse" aria-hidden />
+                {t('shell.live')}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <GlobalSearch />
-            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-semibold text-emerald-700">
-              <Radio className="w-2.5 h-2.5 animate-pulse" />
-              System Live
-            </span>
-          </div>
+          {searchOpen && (
+            <div className="md:hidden px-3 pb-3">
+              <GlobalSearch className="w-full" autoFocus />
+            </div>
+          )}
         </header>
 
+        {showSetupBanner && (
+          <div className="flex-shrink-0 flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 py-2.5 bg-sky-50 border-b border-sky-100 text-sm text-sky-900">
+            <span className="flex items-center gap-2">
+              <Wand2 className="w-4 h-4 text-sky-600" aria-hidden />
+              {t('shell.setupBanner')}
+            </span>
+            <Link href="/setup" className="font-semibold text-sky-700 hover:text-sky-900 underline underline-offset-2">
+              {t('shell.setupBannerAction')}
+            </Link>
+          </div>
+        )}
+
         {/* Page content */}
-        <main className="flex-1 overflow-auto bg-gray-50">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
       </div>
 
       <Toaster />
