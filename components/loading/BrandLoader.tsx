@@ -31,8 +31,8 @@ export default function BrandLoader({ message, delayMs = 250 }: { message?: stri
       <p className="text-4xl sm:text-5xl font-black tracking-tight text-white" aria-hidden>
         STAYWISE<span className="sw-dot inline-block text-sky-400">.</span>
       </p>
-      <p className="mt-6 text-sm text-white/60">{message ?? t('loading.session')}</p>
-      {slow && <p className="mt-2 max-w-xs text-center text-xs text-white/40">{t('loading.slow')}</p>}
+      <p className="mt-6 text-sm text-white/75">{message ?? t('loading.session')}</p>
+      {slow && <p className="mt-2 max-w-xs text-center text-sm text-white/70">{t('loading.slow')}</p>}
     </div>
   )
 }

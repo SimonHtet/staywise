@@ -319,6 +319,21 @@ export function DashboardShell({ children, currency }: { children: React.ReactNo
       if (e.key === 'Escape') {
         setMenuOpen(false)
         menuButtonRef.current?.focus()
+        return
+      }
+      // Keep Tab inside the open drawer
+      if (e.key === 'Tab' && drawerRef.current) {
+        const items = drawerRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+        if (items.length === 0) return
+        const first = items[0]
+        const last = items[items.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
       }
     }
     document.addEventListener('keydown', onKey)

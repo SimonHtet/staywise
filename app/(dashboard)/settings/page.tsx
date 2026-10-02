@@ -349,12 +349,14 @@ export default function SettingsPage() {
                   <p className="text-xs text-teal-800/80 mb-3">They’ll be asked to choose their own password the first time they sign in.</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <input
+                      aria-label="Full name"
                       placeholder="Full name"
                       value={addUserForm.name}
                       onChange={(e) => setAddUserForm(p => ({ ...p, name: e.target.value }))}
                       className={inputCls}
                     />
                     <input
+                      aria-label="Email"
                       placeholder="Email"
                       type="email"
                       value={addUserForm.email}
@@ -362,6 +364,7 @@ export default function SettingsPage() {
                       className={inputCls}
                     />
                     <input
+                      aria-label="Temporary password"
                       placeholder="Temporary password (8+ chars)"
                       type="password"
                       value={addUserForm.password}
@@ -369,6 +372,7 @@ export default function SettingsPage() {
                       className={inputCls}
                     />
                     <select
+                      aria-label="Role"
                       value={addUserForm.userRole}
                       onChange={(e) => setAddUserForm(p => ({ ...p, userRole: e.target.value }))}
                       className={`${inputCls} bg-white`}
