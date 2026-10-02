@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import PrintBar from '../PrintBar'
+import { hotelToday } from '@/lib/hoteltime'
 
 // Immigration registration of foreign guests arriving on a given date.
 // Shows full passport numbers deliberately — this is an official report.
@@ -23,10 +24,11 @@ export default async function ForeignerRegPage({
   const role = (session.user as any).role ?? ''
   if (role === 'housekeeping') redirect('/')
 
-  const hotelId = (session.user as any).hotelId ?? 'HOTEL-001'
+  const hotelId = (session.user as any).hotelId as string | undefined
+  if (!hotelId) redirect('/login')
   const date = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.date ?? '')
     ? searchParams.date!
-    : new Date().toISOString().split('T')[0]
+    : await hotelToday(hotelId)
 
   const [hotel, arrivals] = await Promise.all([
     prisma.hotel.findUnique({ where: { id: hotelId } }),

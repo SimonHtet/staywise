@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { hasPermission } from '@/lib/rbac'
 import { FileBarChart, Globe, ExternalLink } from 'lucide-react'
+import { todayIn } from '@/lib/dates'
 
 const inputCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent'
 
 function today() {
-  return new Date().toISOString().split('T')[0]
+  return todayIn()
 }
 
 export default function ReportsPage() {

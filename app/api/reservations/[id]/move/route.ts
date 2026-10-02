@@ -4,6 +4,7 @@ import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { calculateNights } from '@/lib/utils'
 import { ROOM_TYPES } from '@/lib/constants'
+import { hotelToday } from '@/lib/hoteltime'
 
 export async function POST(
   req: NextRequest,
@@ -109,7 +110,7 @@ export async function POST(
     // Apply pricing action when room type changes
     if (newRoom.type !== reservation.roomTypeId) {
       const newRate = ROOM_TYPES[newRoom.type]?.rate ?? reservation.rate
-      const today = new Date().toISOString().split('T')[0]
+      const today = await hotelToday(hotelId!)
 
       if (pricingAction === 'charge_diff') {
         await Promise.all([

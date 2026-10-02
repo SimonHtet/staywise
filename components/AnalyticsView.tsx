@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { TrendingUp, Hotel, DollarSign, BarChart3, Users, Search, RefreshCw } from 'lucide-react'
+import { todayIn, addDays } from '@/lib/dates'
 
 interface DailyRevenue {
   date: string
@@ -418,8 +419,8 @@ function AccountTable({ rows, title }: { rows: CompanyRevenue[]; title: string }
 }
 
 export default function AnalyticsView() {
-  const today = new Date().toISOString().split('T')[0]
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
+  const today = todayIn()
+  const thirtyDaysAgo = addDays(todayIn(), -(30))
 
   const [from, setFrom] = useState(thirtyDaysAgo)
   const [to, setTo] = useState(today)
@@ -453,7 +454,7 @@ export default function AnalyticsView() {
   ]
 
   function applyPreset(days: number) {
-    const f = new Date(Date.now() - days * 86400000).toISOString().split('T')[0]
+    const f = addDays(todayIn(), -(days))
     setFrom(f)
     setTo(today)
     load(f, today)

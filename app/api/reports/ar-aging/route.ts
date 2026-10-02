@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { getHotelTimezone } from '@/lib/hoteltime'
+import { dateIn } from '@/lib/dates'
 
 export async function GET() {
   const { hotelId, role, error } = await getSessionOrUnauthorized()
@@ -20,6 +22,7 @@ export async function GET() {
     })
 
     const today = new Date()
+    const tz = await getHotelTimezone(hotelId!)
 
     type AgingRow = {
       companyId: string
@@ -54,7 +57,7 @@ export async function GET() {
           days61_90: 0,
           over90: 0,
           total: 0,
-          oldestDate: tx.createdAt.toISOString().split('T')[0],
+          oldestDate: dateIn(tx.createdAt, tz),
           txCount: 0,
         }
       }
@@ -68,7 +71,7 @@ export async function GET() {
       map[cid].total += tx.amount
       map[cid].txCount++
 
-      const txDate = tx.createdAt.toISOString().split('T')[0]
+      const txDate = dateIn(tx.createdAt, tz)
       if (txDate < map[cid].oldestDate) map[cid].oldestDate = txDate
     }
 
@@ -85,7 +88,7 @@ export async function GET() {
       { current: 0, days31_60: 0, days61_90: 0, over90: 0, total: 0 }
     )
 
-    return NextResponse.json({ rows, totals, asOf: today.toISOString().split('T')[0] })
+    return NextResponse.json({ rows, totals, asOf: dateIn(today, tz) })
   } catch (err) {
     console.error('[GET /api/reports/ar-aging] DB error:', err)
     return NextResponse.json({ error: 'Database error' }, { status: 500 })

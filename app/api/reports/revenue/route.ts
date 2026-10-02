@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { getHotelTimezone } from '@/lib/hoteltime'
+import { addDays, dateIn, todayIn, zonedDayRange } from '@/lib/dates'
 
 export async function GET(req: NextRequest) {
   const { hotelId, role, error } = await getSessionOrUnauthorized()
@@ -11,13 +13,15 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const from = searchParams.get('from') ?? new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
-  const to = searchParams.get('to') ?? new Date().toISOString().split('T')[0]
+  const tz = await getHotelTimezone(hotelId!)
+  const today = todayIn(tz)
+  const from = searchParams.get('from') ?? addDays(today, -30)
+  const to = searchParams.get('to') ?? today
 
   try {
     // Settled folios in date range (by settledAt)
-    const fromDt = new Date(from + 'T00:00:00.000Z')
-    const toDt = new Date(to + 'T23:59:59.999Z')
+    const fromDt = zonedDayRange(from, tz).start
+    const toDt = new Date(zonedDayRange(to, tz).end.getTime() - 1)
 
     const folios = await prisma.folio.findMany({
       where: {
@@ -63,7 +67,7 @@ export async function GET(req: NextRequest) {
       }
 
       if (folio.settledAt) {
-        const dk = folio.settledAt.toISOString().split('T')[0]
+        const dk = dateIn(folio.settledAt, tz)
         if (!dailyMap[dk]) dailyMap[dk] = { date: dk, collected: 0, folios: 0 }
         dailyMap[dk].collected += folioTotal
         dailyMap[dk].folios++

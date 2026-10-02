@@ -5,6 +5,7 @@ import { Room, Reservation } from '@/types'
 import { ROOM_TYPES } from '@/lib/constants'
 import { calculateNights } from '@/lib/utils'
 import { GripVertical } from 'lucide-react'
+import { dateIn } from '@/lib/dates'
 
 interface Props {
   rooms: Room[]
@@ -25,8 +26,10 @@ function getDays(count: number, offset: number): Date[] {
   return days
 }
 
+// Local calendar date — days[] are local midnights, so toISOString() (UTC)
+// would label every column one day early east of Greenwich.
 function toDateStr(d: Date): string {
-  return d.toISOString().split('T')[0]
+  return dateIn(d)
 }
 
 function getResStatusColor(status: string): string {

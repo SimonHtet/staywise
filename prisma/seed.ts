@@ -4,6 +4,13 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
+  // Demo data + known passwords (admin1234) must never land in a live hotel's
+  // database. Require an explicit opt-in so a stray `prisma db seed` against
+  // the pilot DATABASE_URL does nothing.
+  if (process.env.ALLOW_DEMO_SEED !== '1') {
+    console.error('Refusing to seed: set ALLOW_DEMO_SEED=1 to load demo data (never on a live hotel database).')
+    process.exit(1)
+  }
   console.log('Seeding database...')
 
   // ── Hotel ──────────────────────────────────────────────────────────────────

@@ -17,7 +17,8 @@ export default async function CompanyStatementPage({ params }: { params: { id: s
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const hotelId = (session.user as any).hotelId ?? 'HOTEL-001'
+  const hotelId = (session.user as any).hotelId as string | undefined
+  if (!hotelId) redirect('/login')
 
   const [company, hotel] = await Promise.all([
     prisma.company.findFirst({

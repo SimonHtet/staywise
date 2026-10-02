@@ -6,6 +6,7 @@ declare module 'next-auth' {
       id: string
       role: string
       hotelId: string
+      mustChangePassword?: boolean
     } & DefaultSession['user']
   }
 }
@@ -15,5 +16,7 @@ declare module 'next-auth/jwt' {
     id: string
     role: string
     hotelId: string
+    mustChangePassword?: boolean
+    checkedAt?: number
   }
 }

@@ -7,6 +7,7 @@ import {
   CheckCircle2, Ban, CreditCard, Banknote, Building2, ChevronDown,
   RefreshCw,
 } from 'lucide-react'
+import { todayIn, addDays } from '@/lib/dates'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -33,13 +34,11 @@ const inputCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outl
 
 // ─── Revenue Report ──────────────────────────────────────────────────────────
 
-function today(): string { return new Date().toISOString().split('T')[0] }
-function monthStart(): string { const d = new Date(); d.setDate(1); return d.toISOString().split('T')[0] }
+function today(): string { return todayIn() }
+function monthStart(): string { return todayIn().slice(0, 8) + '01' }
 function lastMonthRange(): [string, string] {
-  const d = new Date(); d.setDate(1); d.setDate(0)
-  const end = d.toISOString().split('T')[0]
-  d.setDate(1)
-  return [d.toISOString().split('T')[0], end]
+  const end = addDays(monthStart(), -1)
+  return [end.slice(0, 8) + '01', end]
 }
 
 interface RevenueData {

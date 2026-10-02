@@ -8,6 +8,7 @@ import {
   Phone, Mail, MapPin, BadgeDollarSign, AlertTriangle,
   ChevronDown, ChevronUp, CreditCard, Printer, PlusCircle,
 } from 'lucide-react'
+import { todayIn } from '@/lib/dates'
 
 const RACK_RATES: Record<string, number> = {
   STANDARD: 1200, DELUXE: 1800, SUITE: 3500, POOL_VILLA: 6500,
@@ -191,7 +192,7 @@ export default function CompaniesView() {
           {filtered.map((co) => {
             const rates = co.contractRates as Record<string, number>
             const hasBlackout = co.blackoutStart && co.blackoutEnd
-            const today = new Date().toISOString().split('T')[0]
+            const today = todayIn()
             const inBlackout = hasBlackout && today >= co.blackoutStart! && today <= co.blackoutEnd!
             const isExpanded = expandedId === co.id
             const credit = creditData[co.id]

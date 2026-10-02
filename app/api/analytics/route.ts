@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { hotelToday } from '@/lib/hoteltime'
+import { addDays } from '@/lib/dates'
 
 type DailyMapReservation = {
   checkIn: string; checkOut: string; rate: number; totalNights: number; totalAmount: number
@@ -64,8 +66,9 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const from = searchParams.get('from') ?? new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
-  const to = searchParams.get('to') ?? new Date().toISOString().split('T')[0]
+  const today = await hotelToday(hotelId!)
+  const from = searchParams.get('from') ?? addDays(today, -30)
+  const to = searchParams.get('to') ?? today
   const compareYear = searchParams.get('compareYear')
 
   try {

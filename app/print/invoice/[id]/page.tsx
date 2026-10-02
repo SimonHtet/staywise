@@ -25,7 +25,8 @@ export default async function PrintInvoicePage({ params }: { params: { id: strin
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const hotelId = (session.user as any).hotelId ?? 'HOTEL-001'
+  const hotelId = (session.user as any).hotelId as string | undefined
+  if (!hotelId) redirect('/login')
 
   const invoice = await prisma.taxInvoice.findFirst({
     where: { id: params.id, hotelId },

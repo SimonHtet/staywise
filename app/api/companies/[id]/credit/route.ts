@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { hotelToday } from '@/lib/hoteltime'
 
 export async function GET(
   _req: NextRequest,
@@ -17,9 +18,8 @@ export async function GET(
     if (!company) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     // Monthly reset check
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0]
-    const todayDay = today.getDate()
+    const todayStr = await hotelToday(hotelId!)
+    const todayDay = Number(todayStr.slice(8, 10))
     const thisMonth = todayStr.substring(0, 7)
     const lastResetMonth = company.lastCreditReset?.substring(0, 7)
 

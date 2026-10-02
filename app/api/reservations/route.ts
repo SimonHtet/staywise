@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { generateReservationNumber, calculateNights, maskPassport } from '@/lib/utils'
+import { hotelToday } from '@/lib/hoteltime'
+import { addDays } from '@/lib/dates'
 
 const ACTIVE_STATUSES = ['confirmed', 'checked_in']
 const DEFAULT_LIST_DAYS_BACK = 30
@@ -86,7 +88,7 @@ export async function GET(req: NextRequest) {
       { status: { in: ACTIVE_STATUSES } },
       {
         checkOut: {
-          gte: from ?? new Date(Date.now() - DEFAULT_LIST_DAYS_BACK * 86400000).toISOString().split('T')[0],
+          gte: from ?? addDays(await hotelToday(hotelId!), -DEFAULT_LIST_DAYS_BACK),
         },
       },
     ]

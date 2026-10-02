@@ -41,6 +41,7 @@ import {
   Grid3X3,
   Star,
 } from 'lucide-react'
+import { todayIn } from '@/lib/dates'
 
 interface Props {
   reservation: Reservation
@@ -331,7 +332,7 @@ export default function ReservationDetailPanel({
     const rate = PACKAGE_RATES[pkgId]
     if (!rate || rate.amount === 0) return
     const chargeAmount = rate.perNight ? rate.amount * nights : rate.amount
-    const today = new Date().toISOString().split('T')[0]
+    const today = todayIn()
     const def = PACKAGE_DEFS.find((p) => p.id === pkgId)
     const chargeData = {
       item: def?.label ?? pkgId,

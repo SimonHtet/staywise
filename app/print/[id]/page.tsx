@@ -40,7 +40,8 @@ export default async function FolioPrintPage({ params }: { params: { id: string 
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const hotelId = (session.user as any).hotelId ?? 'HOTEL-001'
+  const hotelId = (session.user as any).hotelId as string | undefined
+  if (!hotelId) redirect('/login')
 
   const [reservation, hotel, setting] = await Promise.all([
     prisma.reservation.findUnique({

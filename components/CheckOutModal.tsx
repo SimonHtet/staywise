@@ -8,6 +8,7 @@ import { X, Printer, Plus, Check, ArrowRight, ArrowRightLeft } from 'lucide-reac
 import { getFoliosPromise, prefetchFolios } from '@/lib/folio-prefetch'
 import { toast } from '@/lib/toast'
 import { formatMoney, baseToAlt, type HotelSetting } from '@/lib/currency'
+import { todayIn } from '@/lib/dates'
 
 interface Props {
   reservation: Reservation
@@ -164,7 +165,7 @@ export default function CheckOutModal({ reservation: res, onConfirm, onClose }: 
 
   // Balance math uses the (possibly shortened) check-out date
   const effRes = localCheckOut === res.checkOut ? res : { ...res, checkOut: localCheckOut }
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = todayIn()
   const isEarlyDeparture = res.status === 'checked_in' && todayStr > res.checkIn && todayStr < localCheckOut
   const earlyNightsSaved = isEarlyDeparture ? calculateNights(todayStr, localCheckOut) : 0
 

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
 import { calculateNights } from '@/lib/utils'
+import { hotelToday } from '@/lib/hoteltime'
 
 // POST — transfer this linked reservation's outstanding balance to its master
 // reservation's bill. Each open folio gets an offsetting "Billed to master"
@@ -106,7 +107,7 @@ export async function POST(
       })
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = await hotelToday(hotelId!)
 
     await prisma.$transaction(async (tx) => {
       // Offset each open folio so it nets to zero

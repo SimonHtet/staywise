@@ -12,6 +12,7 @@ import {
   Clock,
   ChevronRight,
 } from 'lucide-react'
+import { todayIn } from '@/lib/dates'
 
 interface Props {
   rooms: Room[]
@@ -80,7 +81,7 @@ export default function DashboardView({
   onCheckIn,
   onCheckOut,
 }: Props) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayIn()
 
   const todayArrivals = reservations.filter(
     (r) => r.checkIn === today && r.status === 'confirmed'

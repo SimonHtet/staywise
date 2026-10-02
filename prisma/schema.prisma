@@ -9,22 +9,36 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  password  String
-  role      String   @default("front_desk")
-  hotelId   String   @default("HOTEL-001")
-  createdAt DateTime @default(now())
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  password           String
+  role               String    @default("front_desk")
+  hotelId            String    @default("HOTEL-001")
+  // Deactivated users can't log in and existing sessions are dropped on the
+  // next token refresh. Prefer this over delete — history keeps the name.
+  active             Boolean   @default(true)
+  // Set for seeded/admin-reset accounts; the app forces a change on login.
+  mustChangePassword Boolean   @default(false)
+  passwordChangedAt  DateTime?
+  createdAt          DateTime  @default(now())
 
   @@index([hotelId])
 }
 
 model Hotel {
-  id        String   @id
-  name      String
-  location  String
-  createdAt DateTime @default(now())
+  id               String    @id
+  name             String
+  location         String
+  address          String?
+  phone            String?
+  email            String?
+  taxId            String?
+  logoUrl          String?
+  // IANA zone used for "today" / business date (night audit, arrivals…)
+  timezone         String    @default("Asia/Bangkok")
+  setupCompletedAt DateTime?
+  createdAt        DateTime  @default(now())
 }
 
 model Room {
@@ -365,4 +379,27 @@ model Preferences {
   amenities     String?
   notes         String?
   updatedAt     DateTime    @updatedAt
+}
+
+// Who did what — written by money/reservation/user routes via lib/audit.ts
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  hotelId   String
+  userId    String?
+  userName  String?
+  action    String // e.g. "charge.void", "room.rate", "user.deactivate"
+  entity    String // e.g. "reservation", "folio", "room", "user"
+  entityId  String?
+  details   Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([hotelId, createdAt])
+  @@index([hotelId, entity, entityId])
+}
+
+// Login throttle shared across serverless instances (in-memory doesn't work on Vercel)
+model LoginAttempt {
+  key     String   @id // "ip:<addr>" or "email:<addr>"
+  count   Int      @default(0)
+  resetAt DateTime
 }

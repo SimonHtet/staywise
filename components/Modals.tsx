@@ -10,6 +10,7 @@ import {
   CreditCard, MessageSquare, BedDouble, Hotel, ChevronRight, AlertTriangle,
   Banknote,
 } from 'lucide-react'
+import { todayIn, addDays } from '@/lib/dates'
 
 // Fetches the hotel currency setting; null until loaded (modals fall back to base-only)
 function useHotelSetting(): HotelSetting | null {
@@ -125,8 +126,8 @@ const RACK_RATES: Record<string, number> = {
 }
 
 export function NewReservationModal({ rooms, onConfirm, onClose, initialRoomId }: NewReservationModalProps) {
-  const today = new Date().toISOString().split('T')[0]
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  const today = todayIn()
+  const tomorrow = addDays(todayIn(), 1)
 
   const initialRoom = initialRoomId ? rooms.find((r) => r.id === initialRoomId) : undefined
   const initialRoomType = initialRoom?.type ?? 'STANDARD'
@@ -536,7 +537,7 @@ export function ExtendStayModal({ reservation: res, onConfirm, onClose }: Extend
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">New Check-Out</span>
-            <span className="font-semibold text-teal-700">{newCheckOut.toISOString().split('T')[0]}</span>
+            <span className="font-semibold text-teal-700">{addDays(res.checkOut, extraNights)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Extra Charge</span>
@@ -577,7 +578,7 @@ interface AddChargeModalProps {
 }
 
 export function AddChargeModal({ reservation: res, onConfirm, onClose }: AddChargeModalProps) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayIn()
   const [query, setQuery] = useState('')
   const [item, setItem] = useState('')
   const [amount, setAmount] = useState('')
@@ -744,7 +745,7 @@ interface PostPaymentModalProps {
 }
 
 export function PostPaymentModal({ reservation: res, onConfirm, onClose }: PostPaymentModalProps) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayIn()
   const [paymentType, setPaymentType] = useState('Cash')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(today)
@@ -882,7 +883,7 @@ interface RecordDepositModalProps {
 }
 
 export function RecordDepositModal({ reservation: res, onSaved, onClose }: RecordDepositModalProps) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayIn()
   const [method, setMethod] = useState('Bank Transfer')
   const [amount, setAmount] = useState('')
   const [reference, setReference] = useState('')
@@ -1005,7 +1006,7 @@ interface AddTraceModalProps {
 }
 
 export function AddTraceModal({ reservation: res, onConfirm, onClose }: AddTraceModalProps) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayIn()
   const [text, setText] = useState('')
   const [date, setDate] = useState(today)
   const [department, setDepartment] = useState('FRONT OFFICE')

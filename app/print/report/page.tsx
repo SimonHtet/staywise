@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { hasPermission } from '@/lib/rbac'
 import { formatMoney } from '@/lib/currency'
 import PrintBar from '../PrintBar'
+import { getHotelTimezone, hotelToday } from '@/lib/hoteltime'
+import { addDays, zonedDayRange } from '@/lib/dates'
 
 function fmt(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' })
@@ -30,13 +32,15 @@ export default async function FlashReportPage({
   const role = (session.user as any).role ?? ''
   if (!hasPermission(role, 'VIEW_FINANCIALS')) redirect('/')
 
-  const hotelId = (session.user as any).hotelId ?? 'HOTEL-001'
+  const hotelId = (session.user as any).hotelId as string | undefined
+  if (!hotelId) redirect('/login')
   const date = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.date ?? '')
     ? searchParams.date!
-    : new Date().toISOString().split('T')[0]
-  const tomorrow = new Date(new Date(date + 'T12:00:00Z').getTime() + 86400000).toISOString().split('T')[0]
-  const dayStart = new Date(date + 'T00:00:00.000Z')
-  const dayEnd = new Date(date + 'T23:59:59.999Z')
+    : await hotelToday(hotelId)
+  const tomorrow = addDays(date, 1)
+  const tz = await getHotelTimezone(hotelId)
+  const { start: dayStart, end: dayEndExclusive } = zonedDayRange(date, tz)
+  const dayEnd = new Date(dayEndExclusive.getTime() - 1)
 
   const [
     hotel,

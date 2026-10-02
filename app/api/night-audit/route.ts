@@ -2,17 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
 import { hasPermission } from '@/lib/rbac'
+import { hotelAuditDate } from '@/lib/hoteltime'
 
-function today() {
-  return new Date().toISOString().split('T')[0]
-}
 
 export async function GET(_req: NextRequest) {
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 
   const audit = await prisma.nightAudit.findUnique({
-    where: { hotelId_businessDate: { hotelId: hotelId!, businessDate: today() } },
+    where: { hotelId_businessDate: { hotelId: hotelId!, businessDate: await hotelAuditDate(hotelId!) } },
   })
   return NextResponse.json({ ran: !!audit, audit: audit ?? null })
 }
@@ -25,7 +23,7 @@ export async function POST(_req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden — manager or admin required' }, { status: 403 })
   }
 
-  const businessDate = today()
+  const businessDate = await hotelAuditDate(hotelId!)
 
   // Idempotency — reject if already ran today
   const existing = await prisma.nightAudit.findUnique({

@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionOrUnauthorized } from '@/lib/session'
+import { hotelToday } from '@/lib/hoteltime'
 
 export async function GET() {
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = await hotelToday(hotelId!)
 
   try {
     const [
