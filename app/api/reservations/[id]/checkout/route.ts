@@ -33,6 +33,32 @@ async function POST_handler(
       return NextResponse.json({ error: 'Reservation is not checked in' }, { status: 400 })
     }
 
+    // Group billing: the master pays for linked rooms, so it can't check out
+    // while a linked room is still in house with an unpaid bill — after the
+    // master leaves, that room could no longer be billed to it.
+    const linkedOwing = await prisma.reservation.findMany({
+      where: {
+        masterResId: params.id,
+        hotelId: hotelId!,
+        status: 'checked_in',
+        OR: [
+          { folios: { none: {} } },
+          { folios: { some: { status: { not: 'settled' } } } },
+          { charges: { some: { folioCharge: null } } },
+        ],
+      },
+      select: { roomId: true },
+    })
+    if (linkedOwing.length > 0) {
+      const rooms = linkedOwing.map((r) => r.roomId).join(', ')
+      return NextResponse.json(
+        {
+          error: `Cannot check out the master yet — linked room ${rooms} still has an unpaid bill. Use "Bill to Master Room" on that room (or settle it), then check out the master.`,
+        },
+        { status: 400 },
+      )
+    }
+
     // Settlement enforcement — the modal disables the button client-side, but the
     // API must not allow checkout with open folios or unbilled charges.
     const [folios, unassignedCount] = await Promise.all([

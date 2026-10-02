@@ -36,6 +36,16 @@ async function POST_handler(
       return NextResponse.json({ error: 'Charge not found on this reservation' }, { status: 404 })
     }
 
+    // A settled folio is closed: moving money into or out of it would change
+    // what the guest already paid without anyone collecting / refunding it
+    if (folio.status === 'settled') {
+      return NextResponse.json({ error: `Folio "${folio.name}" is already paid — reopen it before changing its charges` }, { status: 400 })
+    }
+    const current = await prisma.folioCharge.findUnique({ where: { chargeId }, include: { folio: { select: { status: true, name: true } } } })
+    if (current && current.folioId !== folioId && current.folio.status === 'settled') {
+      return NextResponse.json({ error: `That charge is on folio "${current.folio.name}", which is already paid` }, { status: 400 })
+    }
+
     // Upsert: move or create the FolioCharge link
     const folioCharge = await prisma.folioCharge.upsert({
       where: { chargeId },
@@ -75,6 +85,9 @@ async function DELETE_handler(
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
+    if (folio.status === 'settled') {
+      return NextResponse.json({ error: `Folio "${folio.name}" is already paid — reopen it before changing its charges` }, { status: 400 })
+    }
     await prisma.folioCharge.deleteMany({ where: { folioId, chargeId } })
     return NextResponse.json({ ok: true })
   } catch (err) {

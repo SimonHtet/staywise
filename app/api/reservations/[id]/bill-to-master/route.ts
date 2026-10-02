@@ -97,16 +97,27 @@ async function POST_handler(
       return NextResponse.json({ transferred: 0, masterResNumber: master.reservationNumber })
     }
 
-    // Ensure the master has a Main folio to receive the charge
+    // The group charge must land on an OPEN master folio. If the master has
+    // already paid its Main folio, posting there would mark the linked room's
+    // money as paid and let the master check out without collecting it —
+    // use (or open) a separate "Group billing" folio instead.
     let masterMain = await prisma.folio.findFirst({
-      where: { reservationId: master.id, name: 'Main' },
+      where: { reservationId: master.id, name: 'Main', status: { not: 'settled' } },
       select: { id: true },
     })
     if (!masterMain) {
-      masterMain = await prisma.folio.create({
-        data: { reservationId: master.id, name: 'Main' },
-        select: { id: true },
-      })
+      masterMain =
+        (await prisma.folio.findFirst({
+          where: { reservationId: master.id, name: 'Group billing', status: { not: 'settled' } },
+          select: { id: true },
+        })) ??
+        (await prisma.folio.create({
+          data: {
+            reservationId: master.id,
+            name: (await prisma.folio.count({ where: { reservationId: master.id, name: 'Main' } })) ? 'Group billing' : 'Main',
+          },
+          select: { id: true },
+        }))
     }
 
     const today = await hotelToday(hotelId!)

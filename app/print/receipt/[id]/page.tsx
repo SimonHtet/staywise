@@ -16,6 +16,7 @@ const METHOD_LABELS: Record<string, string> = {
   promptpay: 'PromptPay',
   company_credit: 'company account',
   city_ledger: 'company account',
+  master: 'billed to master room',
 }
 
 // 80 mm thermal receipt — the format small hotels hand to guests at check-out.
@@ -59,7 +60,12 @@ export default async function ReceiptPage(props: { params: Promise<{ id: string 
   const lines: { label: string; amount: number }[] = []
   for (const f of reservation.folios) {
     const proj = roomProjection(f, reservation)
-    if (proj > 0) lines.push({ label: `Room ${reservation.roomId} · ${n} night(s) × ${money(reservation.rate)}`, amount: proj })
+    if (proj > 0) {
+      // Projection = nights the night audit hasn't posted yet (all of them if it never ran)
+      const pending = reservation.rate > 0 ? Math.round(proj / reservation.rate) : n
+      const label = pending === n ? `${n} night(s)` : `${pending} more night(s)`
+      lines.push({ label: `Room ${reservation.roomId} · ${label} × ${money(reservation.rate)}`, amount: proj })
+    }
     for (const fc of f.charges) lines.push({ label: fc.charge.item, amount: fc.charge.amount })
   }
   const charges = lines.filter((l) => l.amount > 0)

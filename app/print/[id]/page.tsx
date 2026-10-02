@@ -115,7 +115,13 @@ export default async function FolioPrintPage(props: { params: Promise<{ id: stri
                     <tr className="border-b border-slate-100">
                       <td className="py-1.5 px-2 text-slate-400 text-xs">{reservation.checkIn}</td>
                       <td className="py-1.5 px-2 text-slate-700">
-                        Room Charge — {reservation.roomTypeId} ({nights(reservation.checkIn, reservation.checkOut)} night{nights(reservation.checkIn, reservation.checkOut) !== 1 ? 's' : ''} × {sym}{fmtCurrency(reservation.rate)})
+                        {(() => {
+                          // Only the nights night audit hasn't posted yet are projected here
+                          const total = nights(reservation.checkIn, reservation.checkOut)
+                          const pending = reservation.rate > 0 ? Math.round(roomProjection(folio, reservation) / reservation.rate) : total
+                          const label = pending === total ? `${total} night${total !== 1 ? 's' : ''}` : `${pending} more night${pending !== 1 ? 's' : ''}`
+                          return <>Room Charge — {reservation.roomTypeId} ({label} × {sym}{fmtCurrency(reservation.rate)})</>
+                        })()}
                       </td>
                       <td className="py-1.5 px-2 text-right font-medium text-slate-800">
                         {sym}{fmtCurrency(roomProjection(folio, reservation))}

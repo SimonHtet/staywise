@@ -400,10 +400,12 @@ async function main() {
   await prisma.charge.deleteMany({ where: { reservationId: 'R001' } })
   await prisma.charge.deleteMany({ where: { reservationId: 'R002' } })
 
+  // Nightly room lines use the night audit's exact wording ("Room Charge — …");
+  // the folio projection only recognises that form, any other name double-bills.
   // ── Charges for R001 (James Anderson) ──────────────────────────────────────
   const r001Charges = [
-    { reservationId: 'R001', item: 'Room Charge (1N)', amount: 1200, date: fmt(addDays(today, -2)), category: 'ROOM' },
-    { reservationId: 'R001', item: 'Room Charge (2N)', amount: 1200, date: fmt(addDays(today, -1)), category: 'ROOM' },
+    { reservationId: 'R001', item: 'Room Charge — 102 (STANDARD)', amount: 1200, date: fmt(addDays(today, -2)), category: 'ROOM' },
+    { reservationId: 'R001', item: 'Room Charge — 102 (STANDARD)', amount: 1200, date: fmt(addDays(today, -1)), category: 'ROOM' },
     { reservationId: 'R001', item: 'Mini Bar', amount: 450, date: fmt(addDays(today, -1)), category: 'MINIBAR' },
     { reservationId: 'R001', item: 'Breakfast x2', amount: 600, date: fmt(today), category: 'F&B' },
   ]
@@ -413,7 +415,7 @@ async function main() {
 
   // ── Charges for R002 (Hiroshi Tanaka - VVIP) ───────────────────────────────
   const r002Charges = [
-    { reservationId: 'R002', item: 'Suite Charge (1N)', amount: 3500, date: fmt(addDays(today, -1)), category: 'ROOM' },
+    { reservationId: 'R002', item: 'Room Charge — 301 (SUITE)', amount: 3500, date: fmt(addDays(today, -1)), category: 'ROOM' },
     { reservationId: 'R002', item: 'Spa Treatment', amount: 4500, date: fmt(today), category: 'SPA' },
     { reservationId: 'R002', item: 'Welcome Champagne', amount: 1200, date: fmt(addDays(today, -1)), category: 'F&B' },
     { reservationId: 'R002', item: 'Payment — Credit Card', amount: -5000, date: fmt(today), category: 'PAYMENT' },
