@@ -6,8 +6,9 @@ import { audited } from '@/lib/audit'
 // POST — assign a charge to a folio (moves it from any previous folio)
 async function POST_handler(
   req: NextRequest,
-  { params }: { params: { id: string; folioId: string } }
+  props: { params: Promise<{ id: string; folioId: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -51,8 +52,9 @@ async function POST_handler(
 // DELETE — remove charge from folio (unassign)
 async function DELETE_handler(
   req: NextRequest,
-  { params }: { params: { id: string; folioId: string } }
+  props: { params: Promise<{ id: string; folioId: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 

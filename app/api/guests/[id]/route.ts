@@ -7,8 +7,9 @@ const PREF_FIELDS = ['smokingPref', 'bedPref', 'pillowPref', 'floorPref', 'viewP
 
 async function PATCH_handler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 

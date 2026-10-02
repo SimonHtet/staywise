@@ -20,7 +20,8 @@ const METHOD_LABELS: Record<string, string> = {
 
 // 80 mm thermal receipt — the format small hotels hand to guests at check-out.
 // Everything is one narrow column; no colour, no images except the logo.
-export default async function ReceiptPage({ params }: { params: { id: string } }) {
+export default async function ReceiptPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
   const hotelId = (session.user as any).hotelId as string | undefined

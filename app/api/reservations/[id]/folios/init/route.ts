@@ -8,8 +8,9 @@ import { audited } from '@/lib/audit'
 // return only { ok, folioId } and skip the heavy nested re-read.
 async function POST_handler(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 

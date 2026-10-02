@@ -14,7 +14,8 @@ function fmtCurrency(amount: number) {
   return new Intl.NumberFormat('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
 }
 
-export default async function CompanyStatementPage({ params }: { params: { id: string } }) {
+export default async function CompanyStatementPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 

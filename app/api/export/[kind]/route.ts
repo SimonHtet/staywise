@@ -12,7 +12,8 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/
 const MAX_ROWS = 20000
 
 // GET /api/export/{reservations|guests|revenue|receivables}?from=YYYY-MM-DD&to=YYYY-MM-DD
-export async function GET(req: NextRequest, { params }: { params: { kind: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ kind: string }> }) {
+  const params = await props.params
   const { session, hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'VIEW_FINANCIALS')) {

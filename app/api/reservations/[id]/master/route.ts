@@ -6,8 +6,9 @@ import { audited } from '@/lib/audit'
 // POST /api/reservations/[id]/master — link this reservation under a master
 async function POST_handler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -51,8 +52,9 @@ async function POST_handler(
 // DELETE /api/reservations/[id]/master — unlink this reservation from its master
 async function DELETE_handler(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 

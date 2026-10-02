@@ -7,8 +7,9 @@ import { audited } from '@/lib/audit'
 
 async function PUT_handler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, session, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'MANAGE_USERS')) {
@@ -69,8 +70,9 @@ async function PUT_handler(
 
 async function DELETE_handler(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, session, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'MANAGE_USERS')) {

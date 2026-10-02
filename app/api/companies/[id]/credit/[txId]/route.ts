@@ -6,8 +6,9 @@ import { audited } from '@/lib/audit'
 
 async function PUT_handler(
   _req: NextRequest,
-  { params }: { params: { id: string; txId: string } }
+  props: { params: Promise<{ id: string; txId: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'POST_PAYMENT')) {

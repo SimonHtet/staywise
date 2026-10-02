@@ -22,7 +22,8 @@ const STATUS_BADGE: Record<string, string> = {
   void: 'bg-red-100 text-red-500',
 }
 
-export default async function PrintInvoicePage({ params }: { params: { id: string } }) {
+export default async function PrintInvoicePage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 

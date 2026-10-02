@@ -17,8 +17,9 @@ const RESERVATION_INCLUDE = {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -45,8 +46,9 @@ export async function GET(
 
 async function PUT_handler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 

@@ -10,8 +10,9 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
 
 async function POST_handler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
 

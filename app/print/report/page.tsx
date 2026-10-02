@@ -22,11 +22,8 @@ const PM_LABELS: Record<string, string> = {
   city_ledger: 'City Ledger',
 }
 
-export default async function FlashReportPage({
-  searchParams,
-}: {
-  searchParams: { date?: string }
-}) {
+export default async function FlashReportPage(props: { searchParams: Promise<{ date?: string }> }) {
+  const searchParams = await props.searchParams
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
   const role = (session.user as any).role ?? ''

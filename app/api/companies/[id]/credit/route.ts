@@ -9,8 +9,9 @@ import { formatMoney } from '@/lib/currency'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, error } = await getSessionOrUnauthorized()
   if (error) return error
 
@@ -52,8 +53,9 @@ export async function GET(
 
 async function POST_handler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   // Front desk needs this to settle folios to company credit at checkout
@@ -141,8 +143,9 @@ async function POST_handler(
 // PATCH — settle all unpaid transactions for this company
 async function PATCH_handler(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'POST_PAYMENT')) {

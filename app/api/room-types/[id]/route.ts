@@ -4,7 +4,8 @@ import { getSessionOrUnauthorized } from '@/lib/session'
 import { audited } from '@/lib/audit'
 import { canManageRooms, parseRoomType } from '@/lib/roomtypes'
 
-async function PUT_handler(req: NextRequest, { params }: { params: { id: string } }) {
+async function PUT_handler(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!canManageRooms(role!)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -21,7 +22,8 @@ async function PUT_handler(req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json(updated)
 }
 
-async function DELETE_handler(_req: NextRequest, { params }: { params: { id: string } }) {
+async function DELETE_handler(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!canManageRooms(role!)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

@@ -14,7 +14,8 @@ function nights(checkIn: string, checkOut: string) {
   return Math.max(1, Math.round(diff / 86400000))
 }
 
-export default async function ConfirmationPrintPage({ params }: { params: { id: string } }) {
+export default async function ConfirmationPrintPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 

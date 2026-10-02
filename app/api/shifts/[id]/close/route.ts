@@ -10,8 +10,9 @@ import { hotelAmountCap } from '@/lib/limits'
 
 async function POST_handler(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, session, error } = await getSessionOrUnauthorized()
   if (error) return error
 

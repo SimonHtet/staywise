@@ -12,8 +12,9 @@ import { audited } from '@/lib/audit'
 // charge, so group totals settle on the master room and nothing is counted twice.
 async function POST_handler(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params
   const { hotelId, role, error } = await getSessionOrUnauthorized()
   if (error) return error
   if (!hasPermission(role!, 'ADD_CHARGE')) {

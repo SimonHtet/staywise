@@ -45,7 +45,8 @@ export async function writeAudit(entry: {
   }
 }
 
-type Ctx = { params: Record<string, string> }
+// Next 15+: route params arrive as a Promise
+type Ctx = { params: Promise<Record<string, string>> }
 type Handler = (req: Request, ctx: Ctx) => Promise<Response>
 
 /**
@@ -67,7 +68,7 @@ export function audited(action: string, handler: (req: any, ctx: any) => Promise
       const session = await getServerSession(authOptions)
       const user = session?.user as any
       if (user?.hotelId) {
-        const { id, ...otherParams } = ctx?.params ?? {}
+        const { id, ...otherParams } = (await ctx?.params) ?? {}
         await writeAudit({
           hotelId: user.hotelId,
           userId: user.id,

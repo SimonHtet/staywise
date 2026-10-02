@@ -8,9 +8,6 @@ const securityHeaders = [
 
 const nextConfig = {
   transpilePackages: ['motion'],
-  images: {
-    domains: ['picsum.photos']
-  },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }]
   }

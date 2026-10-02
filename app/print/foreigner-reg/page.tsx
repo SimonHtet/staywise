@@ -14,11 +14,8 @@ function fmt(dateStr: string) {
 
 const DOMESTIC = ['thai', 'thailand', 'th']
 
-export default async function ForeignerRegPage({
-  searchParams,
-}: {
-  searchParams: { date?: string }
-}) {
+export default async function ForeignerRegPage(props: { searchParams: Promise<{ date?: string }> }) {
+  const searchParams = await props.searchParams
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
   const role = (session.user as any).role ?? ''
